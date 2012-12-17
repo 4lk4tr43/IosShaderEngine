@@ -32,7 +32,8 @@ public:
 	void load_screen(string screenName)
 	{
 		throw std::exception("The method or operation is not implemented.");
-		//this is a small change
+		// this
+		// does
 	}
 };
 
