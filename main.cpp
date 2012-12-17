@@ -34,6 +34,8 @@ public:
 		throw std::exception("The method or operation is not implemented.");
 		// this
 		// does
+		// change this
+		// more
 	}
 };
 
