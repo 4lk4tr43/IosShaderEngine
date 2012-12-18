@@ -6,6 +6,9 @@
 #include <memory>
 #include <chrono>
 #include <random>
+#include <limits>
+#include <algorithm>
+#include <vector>
 using namespace std;
 
 #include "glm/glm.hpp"
@@ -18,6 +21,14 @@ using namespace glm;
 #include <stdlib.h>
 #include <crtdbg.h>
 #endif
+
+void f()
+{
+	for (int i = 0; i < 10000; ++i)
+	{
+		cout << i << endl;
+	}
+}
 
 class AssetManager
 {
@@ -32,32 +43,72 @@ public:
 	void load_screen(string screenName)
 	{
 		throw std::exception("The method or operation is not implemented.");
-		// this
-		// more
 	}
+};
+
+
+
+class Asset
+{
+public:
+	enum Type
+	{
+		unknown,
+		data,
+
+		texture,
+		shader,
+		mesh,
+		skeleton,
+		
+		audio,
+		music,
+
+		gui,
+		screen
+	};
+
+	Asset()
+	{
+		type = Type::unknown;
+	}
+
+	Type type;
+	string name;
 };
 
 class Root
 {
 public:
 	AssetManager *assetManager;
+	bool seperate_thread, star_exit;
 
-	void init(function<void (void)> openGLInit, string baseFolder = "")
+	Root(string baseFolder = "")
 	{
 		assetManager = new AssetManager(baseFolder);
-
-		openGLInit();
+		star_exit = false;
 	}
-	void release(function<void (void)> openGLRelease)
+	~Root()
 	{
-		openGLRelease();
-
 		delete assetManager;
 	}
 
-	void run(function<void (Root *root)> loop)
-	{
-		loop(this);
+	void run(function<void (Root *root)> loop, function<void (void)> init_loop = nullptr, function<void (void)> release_loop = nullptr, bool seperate_thread = true)
+	{		
+		auto loop_lambda = [&]()
+		{
+			if (init_loop) init_loop();
+			loop(this);
+			if (release_loop) release_loop();
+		};
+
+		if (seperate_thread)
+		{
+			thread render_thread(loop_lambda);
+			render_thread.join();
+		}
+		else
+			loop_lambda();
 	}
 };
 
@@ -82,7 +133,6 @@ public:
 		throw invalid_argument(string("Couldn't determine file of path string."));
 	}
 };
-
 class File
 {	
 	static void file_out_binary(ofstream &o, const char * data, streamsize count) 
@@ -144,16 +194,16 @@ public:
 	}
 };
 
-template <class T> class Random
+template <class T> class RandomReal
 {
 	mt19937_64 engine;
-	uniform_real<double> u;
+	uniform_real<T> u;
 
 public:
-	Random(T lower, T upper, unsigned long seed = 0)
+	RandomReal(T lower, T upper, unsigned long seed = 0)
 	{
 		set_seed(seed);
-		u = uniform_real<double>((double)lower, (double)upper);
+		u = uniform_real<T>(lower, upper);
 	}
 	void set_seed(unsigned long seed) 
 	{
@@ -162,31 +212,54 @@ public:
 		else
 			engine.seed((unsigned long)time(nullptr));
 	}
-
 	void operator>>(T &x)
 	{
-		x = (T)u(engine);
+		x = u(engine);
+	}
+};
+template <class T> class RandomInteger
+{
+	mt19937_64 engine;
+	uniform_int<T> u;
+
+public:
+	RandomInteger(T lower, T upper, unsigned long seed = 0)
+	{
+		set_seed(seed);
+		u = uniform_int<T>(lower, upper);
+	}
+	void set_seed(unsigned long seed) 
+	{
+		if (seed)
+			engine.seed(seed);
+		else
+			engine.seed((unsigned long)time(nullptr));
+	}
+	void operator>>(T &x)
+	{
+		x = u(engine);
 	}
 };
 
-void initGL()
+void init()
 {
 	if(!glfwInit()) throw exception("Could not initialize GLFW.");
 	if( !glfwOpenWindow(800,600, 8,8,8,8, 16,0, GLFW_WINDOW)) throw exception("Could not create an GLFW window.");
 	glfwSetWindowTitle("Test Window");
 }
 
-void releaseGL()
+void release()
 {
 	glfwTerminate();
 }
 
-void mainLoop(Root *root)
+void loop(Root *root)
 {
 	bool running = true;
+	float min_fps = numeric_limits<float>::max();
 
 	auto startTime = chrono::system_clock::now();
-	while(running)
+	while(running && !root->star_exit)
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
 		glfwSwapBuffers();
@@ -194,30 +267,17 @@ void mainLoop(Root *root)
 		auto nowTime = chrono::system_clock::now();
 		float fps = 1000.0f / chrono::duration_cast<chrono::milliseconds>(nowTime - startTime).count();
 		startTime = nowTime;
-		cout << fps << endl;
+		min_fps = std::min(min_fps, fps);
 
 		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
 	}
+
+	cout << min_fps << endl;
 }
 
 void main(int argc, char **argv)
 {
-	Random<int> r(-10, 10);
-	
-	int x = 0;
-
-	for (int i = 0; i < 10; i++)
-	{
-		r >> x;
-		r.set_seed(x);
-		cout << x << endl;
-	}
-
-// 	auto root = new Root();
-// 	root->Init(initGL);
-// 	root->Simulate(mainLoop);
-// 	root->Release(releaseGL);
-// 	delete root;
+	make_shared<Root>()->run(loop, init, release, false);
 
 #ifdef _DEBUG
 	cin.get();
