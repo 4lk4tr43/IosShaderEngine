@@ -1,5 +1,10 @@
-#ifndef _data_h
-#define _data_h
+#ifndef data_h__
+#define data_h__
+
+#include <cstdio>
+#include <fstream>
+#include <string>
+using namespace std;
 
 #include <iostream>
 #include <string>
@@ -57,11 +62,6 @@ class File
 	}
     
 public:
-	static void write(string path, const char *data, streamsize count)
-	{
-		ofstream o(path, ios::out | ios::binary | ios::trunc);
-		file_out_binary(o, data, count);
-	}
 	static void append(string path, const char *data, streamsize count)
 	{
 		ofstream o(path, ios::out | ios::binary | ios::app);
@@ -70,7 +70,7 @@ public:
     
 	static void del(string path)
 	{
-        
+        remove("path");
 	}
     
 	static void read(string path, char *buffer, ios::pos_type start = 0, streamsize count = 0)
@@ -79,6 +79,7 @@ public:
 		i.read(buffer, open_binary(count, i, path, start));
 		i.close();
 	}
+
 	static char* read_new(string path, ios::pos_type start = 0, streamsize count = 0)
 	{
 		ifstream i;
@@ -95,6 +96,12 @@ public:
 		auto size = i.tellg();
 		i.close();
 		return size;
+	}
+
+	static void write(string path, const char *data, streamsize count)
+	{
+		ofstream o(path, ios::out | ios::binary | ios::trunc);
+		file_out_binary(o, data, count);
 	}
 };
 
