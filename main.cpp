@@ -22,14 +22,6 @@ using namespace glm;
 #include <crtdbg.h>
 #endif
 
-void f()
-{
-	for (int i = 0; i < 10000; ++i)
-	{
-		cout << i << endl;
-	}
-}
-
 class AssetManager
 {
 public:
@@ -45,8 +37,6 @@ public:
 		throw std::exception("The method or operation is not implemented.");
 	}
 };
-
-
 
 class Asset
 {
@@ -71,9 +61,12 @@ public:
 	Asset()
 	{
 		type = Type::unknown;
+		priority = 0;
 	}
 
 	Type type;
+	unsigned char priority;
+	string missing_url;
 	string name;
 };
 
@@ -169,6 +162,11 @@ public:
 		file_out_binary(o, data, count);
 	}
 
+	static void del(string path) 
+	{
+
+	}
+
 	static void read(string path, char *buffer, ios::pos_type start = 0, streamsize count = 0)
 	{
 		ifstream i;
@@ -192,6 +190,20 @@ public:
 		i.close();
 		return size;
 	}
+};
+class ObjectFile
+{
+public:
+	void append(string path, const char *data) {}
+	void push(string path, const char *data) {}	
+	void insert(string path, const char *data, unsigned long index) {}
+
+	void remove(string path, unsigned long index = 0) {}
+
+	void get(string path, const char *data, unsigned long index = 0) {}
+	char* get_new(string path, unsigned long index = 0) {}
+
+	unsigned long count(string path) {}
 };
 
 template <class T> class RandomReal
@@ -277,6 +289,17 @@ void loop(Root *root)
 
 void main(int argc, char **argv)
 {
+	Asset a;
+	a.name = "this is an asset";
+	a.missing_url = "";
+	File::write("test.txt", (char *)&a, sizeof(a));
+	string b = "this is a string";
+	File::append("test.txt", (char *)&b, sizeof(b));
+
+	auto x = File::read_new("test.txt");
+	Asset *y = (Asset *)x;
+	string *z = (string *)&x[sizeof(*y)];
+
 	make_shared<Root>()->run(loop, init, release, false);
 
 #ifdef _DEBUG
