@@ -4,51 +4,76 @@
 #include <random>
 using namespace std;
 
-template <class T> class RandomReal
+class RandomParent
 {
-	mt19937_64 engine;
-	uniform_real<T> u;
-
+protected:
+    void *_engine;
+    bool _bit64;
+    
+    RandomParent(unsigned long seed = 0, bool bit64 = false)
+    {
+        _bit64 = bit64;
+        
+        if (_bit64)
+            _engine = new mt19937_64();
+        else
+            _engine = new mt19937();
+        
+        set_seed(seed);
+    }
+    ~RandomParent()
+    {
+        if (_bit64)
+            delete ((mt19937_64 *)_engine);
+        else
+            delete ((mt19937 *)_engine);
+    }
+    
 public:
-	RandomReal(T lower, T upper, unsigned long seed = 0)
-	{
-		set_seed(seed);
-		u = uniform_real<T>(lower, upper);
-	}
-	void set_seed(unsigned long seed) 
+    void set_seed(unsigned long seed)
 	{
 		if (seed)
-			engine.seed(seed);
-		else
-			engine.seed((unsigned long)time(nullptr));
-	}
-	void operator>>(T &x)
-	{
-		x = u(engine);
+            if (_bit64)
+                ((mt19937_64 *)_engine)->seed(seed);
+            else
+                ((mt19937 *)_engine)->seed(seed);
+        else
+            if (_bit64)
+                ((mt19937_64 *)_engine)->seed((unsigned long)time(nullptr));
+            else
+                ((mt19937 *)_engine)->seed((unsigned long)time(nullptr));
 	}
 };
 
-template <class T> class RandomInteger
+template <class T> class RandomReal : public RandomParent
 {
-	mt19937_64 engine;
-	uniform_int<T> u;
-
+	uniform_real_distribution<T> _u;
+    
 public:
-	RandomInteger(T lower, T upper, unsigned long seed = 0)
+	RandomReal(T lower, T upper, unsigned long seed = 0, bool bit64 = false) : RandomParent(seed, bit64)
 	{
-		set_seed(seed);
-		u = uniform_int<T>(lower, upper);
+		_u = uniform_real_distribution<T>(lower, upper);
 	}
-	void set_seed(unsigned long seed) 
-	{
-		if (seed)
-			engine.seed(seed);
-		else
-			engine.seed((unsigned long)time(nullptr));
-	}
+    
 	void operator>>(T &x)
 	{
-		x = u(engine);
+		x = _u(*(this->_engine));
+	}
+};
+
+template <class T> class RandomInteger : public RandomParent
+{
+	uniform_int_distribution<T> u;
+
+public:
+	RandomInteger(T lower, T upper, unsigned long seed = 0, bool bit64 = false) : RandomParent(seed, bit64)
+	{        
+		u = uniform_int_distribution<T>(lower, upper);
+	}
+    
+	void operator>>(T &x)
+	{
+		x = _u(*(this->_engine));
 	}
 };
 

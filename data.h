@@ -6,6 +6,15 @@
 #include <string>
 using namespace std;
 
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <chrono>
+#include <random>
+#include <limits>
+#include <vector>
+using namespace std;
+
 class Path
 {
 public:
@@ -106,9 +115,9 @@ public:
 	void remove(string path, unsigned long index = 0) {}
     
 	void get(string path, const char *data, unsigned long index = 0) {}
-	char* get_new(string path, unsigned long index = 0) {}
+	char* get_new(string path, unsigned long index = 0) { return nullptr; }
     
-	unsigned long count(string path) {}
+	unsigned long count(string path) { return 0; }
 };
 
 #endif
