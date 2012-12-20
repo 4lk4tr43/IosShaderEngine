@@ -24,7 +24,7 @@ public:
 		if (pos != string::npos) return path.substr(0, pos + 1);
 		throw invalid_argument("Couldn't determine folder of path string.");
 	}
-    
+
 	static string file(string path)
 	{
 		size_t pos = path.find_last_of("/");
@@ -60,19 +60,19 @@ class File
 			return count;
 		}
 	}
-    
+
 public:
 	static void append(string path, const char *data, streamsize count)
 	{
 		ofstream o(path, ios::out | ios::binary | ios::app);
 		file_out_binary(o, data, count);
 	}
-    
+
 	static void del(string path)
 	{
-        remove("path");
+		remove("path");
 	}
-    
+
 	static void read(string path, char *buffer, ios::pos_type start = 0, streamsize count = 0)
 	{
 		ifstream i;
@@ -89,7 +89,7 @@ public:
 		i.close();
 		return buffer;
 	}
-    
+
 	static streamsize size(string path)
 	{
 		ifstream i(path, ios::in | ios::binary | ios::ate);
@@ -111,12 +111,12 @@ public:
 	void append(string path, const char *data) {}
 	void push(string path, const char *data) {}
 	void insert(string path, const char *data, unsigned long index) {}
-    
+
 	void remove(string path, unsigned long index = 0) {}
-    
+
 	void get(string path, const char *data, unsigned long index = 0) {}
 	char* get_new(string path, unsigned long index = 0) { return nullptr; }
-    
+
 	unsigned long count(string path) { return 0; }
 };
 

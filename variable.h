@@ -15,7 +15,7 @@ public:
 		set_seed(seed);
 		u = uniform_real_distribution<T>(lower, upper);
 	}
-	void set_seed(unsigned long seed) 
+	void set_seed(unsigned long seed)
 	{
 		if (seed)
 			engine.seed(seed);
@@ -39,7 +39,7 @@ public:
 		set_seed(seed);
 		u = uniform_int_distribution<T>(lower, upper);
 	}
-	void set_seed(unsigned long seed) 
+	void set_seed(unsigned long seed)
 	{
 		if (seed)
 			engine.seed(seed);
