@@ -6,15 +6,6 @@
 #include <string>
 using namespace std;
 
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <chrono>
-#include <random>
-#include <limits>
-#include <vector>
-using namespace std;
-
 class Path
 {
 public:
@@ -44,6 +35,7 @@ class File
 		o.write(data, count);
 		o.close();
 	}
+    
 	static streamsize open_binary(streamsize count, ifstream &i, string path, ios::pos_type start)
 	{
 		if (!count)
@@ -70,8 +62,14 @@ public:
     
 	static void del(string path)
 	{
-        remove("path");
+        remove(path.c_str());
 	}
+    
+    static bool exists(string path)
+    {
+        ifstream i(path);
+        return i.good();
+    }
     
 	static void read(string path, char *buffer, ios::pos_type start = 0, streamsize count = 0)
 	{
@@ -105,19 +103,31 @@ public:
 	}
 };
 
+#include <memory>
+#include <typeinfo>
+
 class ObjectFile
 {
 public:
-	void append(string path, const char *data) {}
+	void append(string path, const char *data, type_info typeinfo, size_t size)
+    {
+        size_t header_bytes = sizeof(size_t) + sizeof(type_info);
+        size_t total_bytes =  header_bytes + size;
+        
+        char header[header_bytes];
+        memcpy((void*)header, (const void*)&total_bytes, sizeof(size_t));
+        memcpy((void*)&header[sizeof(size_t)], (const void*)&typeinfo, sizeof(type_info));
+        
+        File::append(path, header, header_bytes);
+        File::append(path, data, size);
+    }
+    
+    unsigned long count(string path) { return 0; }
+    void get(string path, const char *data, unsigned long index = 0) {}
+	char* get_new(string path, unsigned long index = 0) { return nullptr; }
 	void push(string path, const char *data) {}
 	void insert(string path, const char *data, unsigned long index) {}
-    
 	void remove(string path, unsigned long index = 0) {}
-    
-	void get(string path, const char *data, unsigned long index = 0) {}
-	char* get_new(string path, unsigned long index = 0) { return nullptr; }
-    
-	unsigned long count(string path) { return 0; }
 };
 
 #endif

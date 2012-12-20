@@ -16,17 +16,14 @@ public:
 		u = uniform_real_distribution<T>(lower, upper);
 	}
     
+    void operator>>(T &x) {	x = u(engine); }
+    
 	void set_seed(unsigned long seed) 
 	{
 		if (seed)
 			engine.seed(seed);
 		else
 			engine.seed((unsigned long)time(nullptr));
-	}
-    
-	void operator>>(T &x)
-	{
-		x = u(engine);
 	}
 };
 
@@ -42,17 +39,14 @@ public:
 		u = uniform_int_distribution<T>(lower, upper);
 	}
     
+    void operator>>(T &x) {	x = u(engine); }
+    
 	void set_seed(unsigned long seed) 
 	{
 		if (seed)
 			engine.seed(seed);
 		else
 			engine.seed((unsigned long)time(nullptr));
-	}
-    
-	void operator>>(T &x)
-	{
-		x = u(engine);
 	}
 };
 
