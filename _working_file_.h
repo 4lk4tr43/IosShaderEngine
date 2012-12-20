@@ -1,4 +1,3 @@
-
 #include "data.h"
 #include "variable.h"
 
@@ -80,18 +79,21 @@ public:
 	}
 
 	void run(function<void (Root *root)> loop, function<void (void)> init_loop = nullptr, function<void (void)> release_loop = nullptr, bool seperate_thread = true)
-	{		
+	{
 		auto loop_lambda = [&]()
 		{
-			if (init_loop) init_loop();
-			loop(this);
-			if (release_loop) release_loop();
+			if (init_loop)
+				init_loop();
+			if (loop)
+				loop(this);
+			if (release_loop)
+				release_loop();
 		};
 
 		if (seperate_thread)
 		{
-			thread render_thread(loop_lambda);
-			render_thread.join();
+			thread running_thread(loop_lambda);
+			running_thread.join();
 		}
 		else
 			loop_lambda();
