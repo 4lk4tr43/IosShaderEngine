@@ -6,15 +6,6 @@
 #include <string>
 using namespace std;
 
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <chrono>
-#include <random>
-#include <limits>
-#include <vector>
-using namespace std;
-
 class Path
 {
 public:
@@ -44,6 +35,7 @@ class File
 		o.write(data, count);
 		o.close();
 	}
+
 	static streamsize open_binary(streamsize count, ifstream &i, string path, ios::pos_type start)
 	{
 		if (!count)
@@ -109,15 +101,15 @@ class ObjectFile
 {
 public:
 	void append(string path, const char *data) {}
-	void push(string path, const char *data) {}
-	void insert(string path, const char *data, unsigned long index) {}
-
-	void remove(string path, unsigned long index = 0) {}
-
+	unsigned long count(string path) { return 0; }
 	void get(string path, const char *data, unsigned long index = 0) {}
 	char* get_new(string path, unsigned long index = 0) { return nullptr; }
 
-	unsigned long count(string path) { return 0; }
+	void insert(string path, const char *data, unsigned long index) {}
+
+	void push(string path, const char *data) {}
+	void remove(string path, unsigned long index = 0) {}
+
 };
 
 #endif
