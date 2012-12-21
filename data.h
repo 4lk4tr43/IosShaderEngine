@@ -111,22 +111,47 @@ class ObjectFile
 public:
 	void append(string path, const char *data, type_info typeinfo, size_t size)
     {
-        size_t header_bytes = sizeof(size_t) + sizeof(type_info);
-        size_t total_bytes =  header_bytes + size;
-        
-        char header[header_bytes];
-        memcpy((void*)header, (const void*)&total_bytes, sizeof(size_t));
-        memcpy((void*)&header[sizeof(size_t)], (const void*)&typeinfo, sizeof(type_info));
-        
-        File::append(path, header, header_bytes);
+        auto header_size = sizeof(size_t) + sizeof(type_info);
+        char header[header_size];
+        memcpy(header, &size, sizeof(size_t));
+        memcpy(&header[sizeof(size_t)], (const void*)&typeinfo, sizeof(type_info));
+        File::append(path, header, header_size);
         File::append(path, data, size);
     }
     
-    unsigned long count(string path) { return 0; }
+    unsigned long count(string path)
+    {
+        unsigned long count = 0;
+        
+        return count;
+    }
+    
     void get(string path, const char *data, unsigned long index = 0) {}
 	char* get_new(string path, unsigned long index = 0) { return nullptr; }
-	void push(string path, const char *data) {}
-	void insert(string path, const char *data, unsigned long index) {}
+	void push(string path, const char *data, type_info typeinfo, size_t size)
+    {
+        auto header_size = sizeof(size_t) + sizeof(type_info);
+        auto buffer_size = header_size + size + File::size(path);
+        auto buffer = new char[buffer_size];
+        memcpy(buffer, (const void*)&size, sizeof(size_t));
+        memcpy(&buffer[sizeof(size_t)], (const void*)&typeinfo, sizeof(type_info));
+        memcpy(&buffer[header_size], (const void *)data, size);
+        File::read(path, &buffer[header_size + size]);
+        File::write(path, buffer, buffer_size);
+        delete[] buffer;
+    }
+    
+	void insert(string path, const char *data, unsigned long index, type_info typeinfo, size_t size)
+    {
+        auto buffer_size = File::size(path) + size;
+        auto buffer = new char[buffer_size];
+        
+        memcpy((void *)buffer, (const void *)data, size);
+        File::read(path, &buffer[size]);
+        File::write(path, buffer, buffer_size);
+        
+        delete[] buffer;
+    }
 	void remove(string path, unsigned long index = 0) {}
 };
 
