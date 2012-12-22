@@ -5,21 +5,19 @@
 #include <OpenGLES/ES2/glext.h>
 
 #include "variable.h"
-
-
-        static GLint _openGLUtilityCurrentTextureUnit = -1;
         
         // An OpenGL context is needed to execute these methods, else the program will crash with an access violation
         class OpenGLUtility
-        {        
+        {
+            static GLint _current_texture_unit = -1;
         public:
             
-            static void ActivateTextureUnit(GLint textureUnit)
+            static void activate_texture_unit(GLint textureUnit)
             {
-                if (_openGLUtilityCurrentTextureUnit != textureUnit)
+                if (_current_texture_unit != textureUnit)
                 {					
                     glActiveTexture(GL_TEXTURE0 + textureUnit);
-                    _openGLUtilityCurrentTextureUnit = textureUnit;
+                    _current_texture_unit = textureUnit;
                 }
             }
             
