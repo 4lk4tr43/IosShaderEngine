@@ -42,13 +42,13 @@ class File
 		{
 			i.open(path, ios::in | ios::binary | ios::ate);
 			auto real_count = i.tellg();
-			if (!start) i.seekg(start, ios::beg);
+			i.seekg(start, ios::beg);
 			return real_count;
 		}
 		else
 		{
 			i.open(path, ios::in | ios::binary | ios::beg);
-			if (!start) i.seekg(start, ios::beg);
+			i.seekg(start, ios::beg);
 			return count;
 		}
 	}
@@ -104,55 +104,110 @@ public:
 };
 
 #include <memory>
-#include <typeinfo>
-
+#include <typeindex>
 class ObjectFile
 {
-public:
-	void append(string path, const char *data, type_info typeinfo, size_t size)
+    static ios::pos_type get_index_position(string path, unsigned long index)
     {
-        auto header_size = sizeof(size_t) + sizeof(type_info);
+        auto header_size = sizeof(size_t) + sizeof(type_index);
+        size_t size[1];        
+        ios::pos_type position = 0;
+        for (unsigned long i = 0; i < index; i++)
+        {
+            File::read(path, (char*)size, position, sizeof(size_t));
+            position += header_size + size[0];
+        }
+        return position;
+    }
+    
+public:
+	static void append(string path, const char *data, type_index typeinfo, size_t size)
+    {
+        auto header_size = sizeof(size_t) + sizeof(type_index);
         char header[header_size];
         memcpy(header, &size, sizeof(size_t));
-        memcpy(&header[sizeof(size_t)], (const void*)&typeinfo, sizeof(type_info));
+        memcpy(&header[sizeof(size_t)], (const void*)&typeinfo, sizeof(type_index));
         File::append(path, header, header_size);
         File::append(path, data, size);
     }
     
-    unsigned long count(string path)
+    static unsigned long count(string path)
     {
         unsigned long count = 0;
-        
+        auto file_size = File::size(path);        
+        auto header_size = sizeof(size_t) + sizeof(type_index);
+        size_t size[1];
+        ios::pos_type position = 0;
+        while (position < file_size)
+        {
+            File::read(path, (char*)size, position, sizeof(size_t));
+            position += header_size + size[0];
+            count++;
+        }        
         return count;
     }
     
-    void get(string path, const char *data, unsigned long index = 0) {}
-	char* get_new(string path, unsigned long index = 0) { return nullptr; }
-	void push(string path, const char *data, type_info typeinfo, size_t size)
+    static void get(string path, char *data, unsigned long index = 0, type_index *typeinfo = nullptr)
     {
-        auto header_size = sizeof(size_t) + sizeof(type_info);
+        auto header_size = sizeof(size_t) + sizeof(type_index);
+        auto index_position = get_index_position(path, index);
+        char header[header_size];
+        File::read(path, header, index_position, header_size);
+        if (typeinfo)
+            memcpy((void*)typeinfo, (const void*)&header[sizeof(size_t)], sizeof(type_index));
+        File::read(path, data, (size_t)index_position + header_size, ((size_t*)header)[0]);
+    }
+	static char* get_new(string path, unsigned long index = 0, type_index *typeinfo = nullptr)
+    {
+        auto header_size = sizeof(size_t) + sizeof(type_index);
+        auto index_position = get_index_position(path, index);
+        char header[header_size];
+        File::read(path, header, index_position, header_size);
+        if (typeinfo)
+            memcpy((void*)typeinfo, (const void*)&header[sizeof(size_t)], sizeof(type_index));
+        return File::read_new(path, (size_t)index_position + header_size, ((size_t*)header)[0]);
+    }
+	
+    static void push(string path, const char *data, type_index typeinfo, size_t size)
+    {
+        auto header_size = sizeof(size_t) + sizeof(type_index);
         auto buffer_size = header_size + size + File::size(path);
         auto buffer = new char[buffer_size];
         memcpy(buffer, (const void*)&size, sizeof(size_t));
-        memcpy(&buffer[sizeof(size_t)], (const void*)&typeinfo, sizeof(type_info));
+        memcpy(&buffer[sizeof(size_t)], (const void*)&typeinfo, sizeof(type_index));
         memcpy(&buffer[header_size], (const void *)data, size);
         File::read(path, &buffer[header_size + size]);
         File::write(path, buffer, buffer_size);
         delete[] buffer;
     }
     
-	void insert(string path, const char *data, unsigned long index, type_info typeinfo, size_t size)
+	static void insert(string path, const char *data, unsigned long index, type_index typeinfo, size_t size)
     {
-        auto buffer_size = File::size(path) + size;
+        auto header_size = sizeof(size_t) + sizeof(type_index);
+        auto buffer_size = header_size + size + File::size(path);
         auto buffer = new char[buffer_size];
-        
-        memcpy((void *)buffer, (const void *)data, size);
-        File::read(path, &buffer[size]);
+        auto index_position = get_index_position(path, index);
+        File::read(path, buffer, 0, index_position);
+        memcpy(&buffer[index_position], (const void*)&size, sizeof(size_t));
+        memcpy(&buffer[(size_t)index_position + sizeof(size_t)], (const void*)&typeinfo, sizeof(type_index));
+        File::read(path, &buffer[(size_t)index_position + header_size + size], index_position);
         File::write(path, buffer, buffer_size);
-        
         delete[] buffer;
     }
-	void remove(string path, unsigned long index = 0) {}
+    
+	static void remove(string path, unsigned long index = 0)
+    {
+        auto header_size = sizeof(size_t) + sizeof(type_index);
+        auto index_position = get_index_position(path, index);
+        char header[header_size];
+        File::read(path, header, index_position, header_size);
+        auto buffer_size = File::size(path) - header_size - ((size_t*)header)[0];
+        auto buffer = new char[buffer_size];
+        File::read(path, buffer, 0, index_position);
+        File::read(path, &buffer[index_position], (size_t)index_position + header_size + ((size_t*)header)[0]);
+        File::write(path, buffer, buffer_size);
+        delete[] buffer;
+    }
 };
 
 #endif
