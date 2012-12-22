@@ -125,8 +125,8 @@ void test(char *param)
     ObjectFile::push(path, (const char*)u, typeid(float), sizeof(float) * 3);
     ObjectFile::remove(path, 1);
     
-    type_index* ti = (type_index*)new char[sizeof(type_index)];
-    float *r = (float*)ObjectFile::get_new(path, 1, ti);
+    auto ti = ObjectFile::type_index_new();
+    auto r = (float*)ObjectFile::get_new(path, 1, ti);
     
     cout << (*ti == typeid(float[3])) << endl;
     
@@ -136,6 +136,7 @@ void test(char *param)
     }
     cout << endl << ObjectFile::count(path) << endl;
     
+    delete[] ti;
     delete[] r;
     File::del(path);
     

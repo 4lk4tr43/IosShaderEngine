@@ -112,7 +112,7 @@ class ObjectFile
         auto header_size = sizeof(size_t) + sizeof(type_index);
         size_t size[1];        
         ios::pos_type position = 0;
-        for (unsigned long i = 0; i < index; i++)
+        for (unsigned long i = 0; i < index; ++i)
         {
             File::read(path, (char*)size, position, sizeof(size_t));
             position += header_size + size[0];
@@ -207,6 +207,11 @@ public:
         File::read(path, &buffer[index_position], (size_t)index_position + header_size + ((size_t*)header)[0]);
         File::write(path, buffer, buffer_size);
         delete[] buffer;
+    }
+    
+    static type_index* type_index_new()
+    {
+        return (type_index*)new char[sizeof(type_index)];
     }
 };
 
