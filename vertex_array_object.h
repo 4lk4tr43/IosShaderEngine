@@ -62,7 +62,7 @@ public:
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
         glBufferData(GL_ARRAY_BUFFER, vertexDescription.VertexSize() * vertexCount, data, vertexUsage);
 
-        for (unsigned int i = 0; i < vertexDescription.AttributeCount(); ++i)
+        for (GLsizei i = 0; i < vertexDescription.AttributeCount(); ++i)
         {
             VertexAttribute attribute = vertexDescription[i];
 

@@ -97,8 +97,16 @@ public:
 
     ~Shader()
     {
-        if (_program_id) glDeleteProgram(_program_id);
-        if (_uniforms) delete[] _uniforms;
+		if (_program_id) 
+		{
+			glDeleteProgram(_program_id);
+			_program_id = 0;
+		}
+		if (_uniforms)
+		{
+			delete[] _uniforms;
+			_uniforms = nullptr;
+		}
     }
 
     void Activate()

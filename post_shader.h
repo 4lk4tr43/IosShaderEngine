@@ -4,14 +4,14 @@
 #include "shader.h"
 #include "vertex_array_object.h"
 
-#define FULLSCREEN_QUAD_VERTEX_SHADER (GLchar*)"attribute vec2 position;attribute vec2 uv;varying vec2 uvVarying;void main(){gl_Position=vec4(position,0.0,1.0);uvVarying=uv;}"
+#define FULLSCREEN_QUAD_VERTEX_SHADER (GLchar*)"attribute vec2 position;attribute vec2 uv;varying vec2 uv_var;void main(){gl_Position=vec4(position,0.0,1.0);uv_var=uv;}"
 #define FULLSCREEN_QUAD_VERTEX_SHADER_ATTRIB_NAMES (GLchar*)"position,uv"
+
+static unsigned int _post_shader_reference_count = 0;
+static GLuint _post_shader_quad_vertex_shader_id = 0, _vao = 0, _vbo = 0;
 
 class PostShader : public Shader
 {
-	static unsigned int _post_shader_reference_count;
-	static GLuint _post_shader_quad_vertex_shader_id, _vao, _vbo; // _vao must be 0 on first init
-
     static void InitializeVertexStageOnDemand()
     {
         if (!_vao)
@@ -22,7 +22,8 @@ class PostShader : public Shader
                 -1.0f, 1.0f, 0.0f, 1.0f,
                 1.0f, -1.0f, 1.0f, 0.0f,
                 -1.0f, -1.0f, 0.0f, 0.0f
-            };                            
+            };
+  
             GLsizei vertexSize = sizeof(GLfloat) * 4;        
             glGenVertexArraysOES(1, &_vao);
             glBindVertexArrayOES(_vao);           
@@ -38,9 +39,9 @@ class PostShader : public Shader
     }
 
 public:
-
     PostShader(GLuint fragment_shader_id, GLchar *uniform_names_seperated_by_comma = nullptr, string *error_log = nullptr)
     {        
+		_uniforms = nullptr;  
         InitializeVertexStageOnDemand();                
         ++_post_shader_reference_count;
 		_program_id = Shader::LoadShader(FULLSCREEN_QUAD_VERTEX_SHADER_ATTRIB_NAMES, _post_shader_quad_vertex_shader_id, fragment_shader_id, GL_FALSE, error_log);
@@ -50,9 +51,10 @@ public:
 
     PostShader(GLchar *fragment_shader_string, GLchar *uniform_names_seperated_by_comma = nullptr, string *error_log = nullptr)
     {        
+		_uniforms = nullptr;  
         InitializeVertexStageOnDemand();                
         ++_post_shader_reference_count;
-		GLuint fragment_shader_id = Shader::CompileShaderFromString(GL_FRAGMENT_SHADER, fragment_shader_string);
+		GLuint fragment_shader_id = Shader::CompileShaderFromString(GL_FRAGMENT_SHADER, fragment_shader_string, error_log);
         _program_id = Shader::LoadShader(FULLSCREEN_QUAD_VERTEX_SHADER_ATTRIB_NAMES, _post_shader_quad_vertex_shader_id, fragment_shader_id, GL_TRUE, error_log);  
         if (uniform_names_seperated_by_comma) 
 			_uniforms = Shader::GetUniformLocations(string(uniform_names_seperated_by_comma), _program_id);
@@ -60,7 +62,18 @@ public:
 
     ~PostShader()
     {
-        _post_shader_reference_count--;
+		if (_program_id) 
+		{
+			glDeleteProgram(_program_id);
+			_program_id = 0;
+		}
+		if (_uniforms)
+		{
+			delete[] _uniforms;
+			_uniforms = nullptr;
+		}
+
+        --_post_shader_reference_count;
         if (_post_shader_reference_count == 0)
         {
             if (_post_shader_quad_vertex_shader_id) 
@@ -83,6 +96,7 @@ public:
 
     void Draw()
     {
+		Activate();
         glBindVertexArrayOES(_vao); 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);            
     }

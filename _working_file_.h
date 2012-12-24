@@ -96,11 +96,30 @@ public:
 	}
 };
 
-#include <typeindex>
+#include "file.h"
+#include "post_shader.h"
 
-void test(char *param)
+static PostShader *ps;
+
+void TestInit()
 {
-    cout << "Starting test..." << endl;
-        
-    cout << "...end of test." << endl;
+	glViewport(0, 0, 800, 600);
+
+	ifstream input_stream("Shader/fragment_test.fsh");
+	string shader_string;
+	shader_string.assign(istreambuf_iterator<char>(input_stream), istreambuf_iterator<char>());
+	string error_log;
+	input_stream.close();
+	ps = new PostShader((GLchar*)shader_string.c_str(), nullptr, &error_log);
+	cout << error_log << endl << shader_string << endl;
+}
+
+void Test(char *param)
+{
+	ps->Draw();
+}
+
+void TestRelease()
+{
+	delete ps;
 }

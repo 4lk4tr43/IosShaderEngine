@@ -4,6 +4,7 @@
 #include <iostream>
 
 #ifdef WIN32
+	#define GLEW_STATIC 
 	#include "gl/glew.h"
 	#include "gl/glfw.h"
 	typedef __int32 GLfixed;

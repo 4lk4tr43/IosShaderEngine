@@ -52,7 +52,7 @@ public:
 	static void Read(string path, char *buffer, ios::pos_type start = 0, streamsize count = 0)
 	{
 		ifstream i;
-		i.Read(buffer, OpenBinary(count, i, path, start));
+		i.read(buffer, OpenBinary(count, i, path, start));
 		i.close();
 	}
 
@@ -61,7 +61,7 @@ public:
 		ifstream i;
 		auto real_count = OpenBinary(count, i, path, start);
 		char *buffer = new char[(unsigned long)real_count];
-		i.Read(buffer, real_count);
+		i.read(buffer, real_count);
 		i.close();
 		return buffer;
 	}
