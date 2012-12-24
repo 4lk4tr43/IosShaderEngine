@@ -332,11 +332,7 @@ namespace detail
 			detail::type<valType>::is_int ||
 			detail::type<valType>::is_uint, "'clamp' only accept numbers");
 		
-		// Old implementation, less predictable branching
-		//if(x >= maxVal) return maxVal; 
-		//if(x <= minVal) return minVal;
-		//return x;
-		return max(min(x, maxVal), minVal);
+		return min(maxVal, max(minVal, x));
 	}
 
 	template <typename T>
@@ -619,7 +615,7 @@ namespace detail
 		genType const & x
 	)
 	{
-		GLM_STATIC_ASSERT(detail::type<genType>::is_float, "'mix' only accept floating-point inputs");
+		GLM_STATIC_ASSERT(detail::type<genType>::is_float, "'step' only accept floating-point inputs");
 
 		return x < edge ? genType(0) : genType(1);
 	}
@@ -711,7 +707,7 @@ namespace detail
 		genType const & x
 	)
 	{
-		GLM_STATIC_ASSERT(detail::type<genType>::is_float, "'mix' only accept floating-point inputs");
+		GLM_STATIC_ASSERT(detail::type<genType>::is_float, "'smoothstep' only accept floating-point inputs");
 
 		genType tmp = clamp((x - edge0) / (edge1 - edge0), genType(0), genType(1));
 		return tmp * tmp * (genType(3) - genType(2) * tmp);

@@ -1,8 +1,17 @@
 #ifndef opengl_h__
 #define opengl_h__
 
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
+#include <iostream>
+
+#ifdef WIN32
+	#include "gl/glew.h"
+	#include "gl/glfw.h"
+#else
+	#include <OpenGLES/ES2/gl.h>
+	#include <OpenGLES/ES2/glext.h>
+#endif 
+
+
 
 #include "string_tokenizer.h"
 
@@ -16,8 +25,8 @@ public:
     static void ActivateTextureUnit(GLint textureUnit)
     {
         if (_current_texture_unit != textureUnit)
-        {					
-            glActiveTexture(GL_TEXTURE0 + textureUnit);
+        {
+			glActiveTexture(GL_TEXTURE0 + textureUnit);
             _current_texture_unit = textureUnit;
         }
     }
@@ -29,12 +38,12 @@ public:
     
     static void AllExtensionsToConsole()
     {
-        cout << OpenGLUtility::AllExtensions() << endl;
+        cout << OpenGL::AllExtensions() << endl;
     }
 
     static bool AreExtensionsSupported(GLchar *extensions_seperated_by_comma)
     {
-        string extensions(OpenGLUtility::AllExtensions());
+        string extensions(OpenGL::AllExtensions());
         StringTokenizer tokens(string(extensions_seperated_by_comma), string(","));
         for (unsigned int i = 0; i < tokens.LineCount(); ++i)
         {
@@ -52,7 +61,7 @@ public:
     static bool IsExtensionSupported(GLchar *extension)
     {
         string extension_to_find(extension);
-        string extensions(OpenGLUtility::AllExtensions());
+        string extensions(OpenGL::AllExtensions());
         return extensions.find(extension_to_find) != string::npos;
     }
     

@@ -1,7 +1,3 @@
-
-#include "data.h"
-#include "variable.h"
-
 #include <algorithm>
 #include <chrono>
 #include <exception>
@@ -14,6 +10,8 @@ using namespace std;
 
 #include "glm/glm.hpp"
 using namespace glm;
+
+#include "opengl.h"
 
 class AssetManager
 {
@@ -103,42 +101,6 @@ public:
 void test(char *param)
 {
     cout << "Starting test..." << endl;
-    
-    string path = *(string*)param;
-    File::del(path);
-    
-    float v[3];
-    v[0] = 1.0f;
-    v[1] = 2.0f;
-    v[2] = 3.0f;
-    float w[3];
-    w[0] = 4.0f;
-    w[1] = 5.0f;
-    w[2] = 6.0f;
-    float u[3];
-    u[0] = 7.0f;
-    u[1] = 8.0f;
-    u[2] = 9.0f;
-    
-    ObjectFile::append(path, (const char*)v, typeid(float), sizeof(float) * 3);
-    ObjectFile::append(path, (const char*)w, typeid(w), sizeof(float) * 3);
-    ObjectFile::push(path, (const char*)u, typeid(float), sizeof(float) * 3);
-    ObjectFile::remove(path, 1);
-    
-    auto ti = ObjectFile::type_index_new();
-    auto r = (float*)ObjectFile::get_new(path, 1, ti);
-    
-    cout << (*ti == typeid(float[3])) << endl;
-    
-    for (int i = 0; i < 3; ++i)
-    {
-        cout << r[i] << " ";
-    }
-    cout << endl << ObjectFile::count(path) << endl;
-    
-    delete[] ti;
-    delete[] r;
-    File::del(path);
-    
+        
     cout << "...end of test." << endl;
 }
