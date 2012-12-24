@@ -1,170 +1,143 @@
-#ifndef Shader_h__
-#define Shader_h__ Shader_h__
+#ifndef shader_h__
+#define shader_h__
 
-// FUTURE VERSION (OpenGL 3.0 +):
-// It is used for MRT, but the GLSL location definition is stronger than this.
-// This function must be used before program linking (done in LoadShader)
-//
-// static void SetFragmentOutOrder(string namesSeperatedByComma, GLuint program)
-// {
-//     StringTokenizer tokens = StringTokenizer(namesSeperatedByComma, string(","));
-//     for (unsigned int i = 0; i < tokens.LineCount(); ++i) 
-//     {
-//         glBindFragDataLocation(program, i, tokens[i].c_str());
-//     }
-// }
+#include "opengl.h"
 
-#include <OpenGLES/ES2/gl.h>
-
-#include "../Helpers/StringTokenizer.h"
-
-using namespace Eos::Helpers;
-
-namespace Eos
+class Shader
 {
-    namespace OpenGL
+protected:
+    GLint *_uniforms;
+	GLuint _program_id;
+
+    Shader() {}            
+            
+    static GLint * GetUniformLocations(string names_seperated_by_comma, GLuint program)
     {
-        class Shader
-        {
-        protected:
-            GLuint _programID;
-            GLint *_uniforms;
-
-            Shader() {}            
-            
-            static GLboolean LinkProgram(GLuint programReference, string *errorLog = nullptr)
-            {
-                glLinkProgram(programReference);
+        StringTokenizer tokens = StringTokenizer(names_seperated_by_comma, string(","));
+        GLint *locations = new GLint[tokens.LineCount()];
                 
-                GLint status;
-                glGetProgramiv(programReference, GL_LINK_STATUS, &status);
-                if (status == 0)
-                {
-                    if (errorLog)
-                    {
-                        GLsizei logLength;
-                        glGetProgramiv(programReference, GL_INFO_LOG_LENGTH, &logLength);
-                        if (logLength > 0)
-                        {
-                            GLchar *log = new GLchar[logLength];
-                            glGetProgramInfoLog(programReference, logLength, &logLength, log);
-                            *errorLog = *errorLog + string(log);
-                            delete[] log;
-                        }
-                    }
-                    
-                    return GL_FALSE;
-                }
+        for (unsigned int i = 0; i < tokens.LineCount(); ++i) locations[i] = glGetUniformLocation(program, tokens[i].c_str());
                 
-                return GL_TRUE;
-            }
-			static GLuint LoadShader(string attribNamesSeperatedByComma, GLuint vertexShaderID, GLuint fragmentShaderID, GLboolean deleteShadersAfterLoad = GL_TRUE, string *errorLog = nullptr)
-			{
-				GLuint program = glCreateProgram();
-				StringTokenizer attribNames = StringTokenizer(attribNamesSeperatedByComma, string(","));
-                
-				glAttachShader(program, vertexShaderID);
-				glAttachShader(program, fragmentShaderID);
-                
-				for (GLuint i = 0; i < attribNames.LineCount(); ++i) glBindAttribLocation(program, i, attribNames[i].c_str());
-                
-				if (!Shader::LinkProgram(program, errorLog))
-				{
-					glDeleteProgram(program);
-					program = 0;
-				}
-                
-				if (deleteShadersAfterLoad)
-				{
-					if (vertexShaderID) glDeleteShader(vertexShaderID);
-					if (fragmentShaderID) glDeleteShader(fragmentShaderID);
-				}
-                
-				return program;
-			}
-            static GLint * GetUniformLocations(string namesSeperatedByComma, GLuint program)
-            {
-                StringTokenizer tokens = StringTokenizer(namesSeperatedByComma, string(","));
-                GLint *locations = new GLint[tokens.LineCount()];
-                
-                for (unsigned int i = 0; i < tokens.LineCount(); ++i) locations[i] = glGetUniformLocation(program, tokens[i].c_str());
-                
-                return locations;
-            }
-            
-        public:
-            static GLuint CompileShaderFromString(GLenum type, const GLchar *shaderString, string *errorLog = nullptr)
-            {
-                GLuint shader = glCreateShader(type);
-                glShaderSource(shader, 1, &shaderString, 0);
-                glCompileShader(shader);
-                
-                GLint status;
-                glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-                if (status == 0)
-                {
-                    if (errorLog)
-                    {
-                        GLsizei logLength;
-                        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
-                        if (logLength > 0)
-                        {
-                            GLchar *log = new GLchar[logLength];
-                            glGetShaderInfoLog(shader, logLength, &logLength, log);
-                            *errorLog = *errorLog + string(log);
-                            delete[] log;
-                        }
-                    }
-                    
-                    if (shader) glDeleteShader(shader);
-                    return 0;
-                }
-                
-                return shader;
-            }
-            Shader(GLuint vertexShaderID, GLuint fragmentShaderID, GLchar *attribNamesSeperatedByComma, GLchar *uniformNamesSeperatedByComma = nullptr, string *errorLog = nullptr)
-            {
-                _uniforms = nullptr;
-                
-                _programID = Shader::LoadShader(attribNamesSeperatedByComma, vertexShaderID, fragmentShaderID, GL_FALSE, errorLog);
-                if (uniformNamesSeperatedByComma) _uniforms = Shader::GetUniformLocations(string(uniformNamesSeperatedByComma), _programID);
-            }			
-            Shader(GLchar *vertexShaderString, GLchar *fragmentShaderString, GLchar *attribNamesSeperatedByComma, GLchar *uniformNamesSeperatedByComma = nullptr, string *errorLog = nullptr)
-            {            
-                _uniforms = 0;
-                
-                if (errorLog)
-                {                
-                    *errorLog = *errorLog + string("Vertex Shader Compile:\n");
-                    GLuint vertexShaderID = Shader::CompileShaderFromString(GL_VERTEX_SHADER, vertexShaderString, errorLog);
-                    *errorLog = *errorLog + string("Fragment Shader Compile:\n");
-                    GLuint fragmentShaderID = Shader::CompileShaderFromString(GL_FRAGMENT_SHADER, fragmentShaderString, errorLog);
-                    *errorLog = *errorLog + string("Shader Program Link:\n");
-                    _programID = Shader::LoadShader(attribNamesSeperatedByComma, vertexShaderID, fragmentShaderID, GL_TRUE, errorLog);
-                }
-                else
-                {
-                    _programID = Shader::LoadShader(attribNamesSeperatedByComma, Shader::CompileShaderFromString(GL_VERTEX_SHADER, vertexShaderString), Shader::CompileShaderFromString(GL_FRAGMENT_SHADER, fragmentShaderString), GL_TRUE);
-                }
-
-                if (uniformNamesSeperatedByComma) _uniforms = Shader::GetUniformLocations(string(uniformNamesSeperatedByComma), _programID);
-            }
-            ~Shader()
-            {
-                if (_programID) glDeleteProgram(_programID);
-                if (_uniforms) delete[] _uniforms;
-            }
-
-            GLint UniformID(unsigned int uniformPosition)
-            {
-                return _uniforms[uniformPosition];
-            }
-            void Activate()
-            {
-                glUseProgram(_programID);
-            }
-        };
+        return locations;
     }
-}
+            
+    static GLboolean LinkProgram(GLuint program_reference, string *error_log = nullptr)
+    {
+        glLinkProgram(program_reference);
+                
+        GLint status;
+        glGetProgramiv(program_reference, GL_LINK_STATUS, &status);
+        if (!status)
+        {
+            if (error_log)
+            {
+                GLsizei log_length;
+                glGetProgramiv(program_reference, GL_INFO_LOG_LENGTH, &log_length);
+                if (log_length > 0)
+                {
+                    GLchar *log = new GLchar[log_length];
+                    glGetProgramInfoLog(program_reference, log_length, &log_length, log);
+                    *error_log = *error_log + string(log);
+                    delete[] log;
+                }
+            }               
+            return GL_FALSE;
+        }
+        return GL_TRUE;
+    }
 
-#endif // Shader_h__
+	static GLuint LoadShader(string attrib_names_seperated_by_comma, GLuint vertex_shader_id, GLuint fragment_shader_id, GLboolean delete_shaders_after_load = GL_TRUE, string *error_log = nullptr)
+	{
+		GLuint program = glCreateProgram();
+		StringTokenizer attrib_names = StringTokenizer(attrib_names_seperated_by_comma, string(","));
+		glAttachShader(program, vertex_shader_id);
+		glAttachShader(program, fragment_shader_id);
+		for (GLuint i = 0; i < attrib_names.LineCount(); ++i) 
+			glBindAttribLocation(program, i, attrib_names[i].c_str());
+		if (!Shader::LinkProgram(program, error_log))
+		{
+			glDeleteProgram(program);
+			program = 0;
+		}
+		if (delete_shaders_after_load)
+		{
+			if (vertex_shader_id) glDeleteShader(vertex_shader_id);
+			if (fragment_shader_id) glDeleteShader(fragment_shader_id);
+		}       
+		return program;
+	}
+
+public:
+	Shader(GLuint vertex_shader_id, GLuint fragment_Shader_id, GLchar *attrib_names_seperated_by_comma, GLchar *uniform_names_seperated_by_comma = nullptr, string *errorLog = nullptr)
+    {
+        _uniforms = nullptr;
+        _program_id = Shader::LoadShader(attrib_names_seperated_by_comma, vertex_shader_id, fragment_Shader_id, GL_FALSE, errorLog);
+        if (uniform_names_seperated_by_comma) 
+			_uniforms = Shader::GetUniformLocations(string(uniform_names_seperated_by_comma), _program_id);
+    }			
+    
+	Shader(GLchar *vertex_shader_string, GLchar *fragment_shader_string, GLchar *attrib_names_seperated_by_comma, GLchar *uniform_names_seperated_by_comma = nullptr, string *error_log = nullptr)
+    {            
+        _uniforms = nullptr;    
+        if (error_log)
+        {                
+            *error_log = *error_log + string("Vertex Shader Compile:\n");
+            GLuint vertex_shader_id = Shader::CompileShaderFromString(GL_VERTEX_SHADER, vertex_shader_string, error_log);
+            *error_log = *error_log + string("Fragment Shader Compile:\n");
+            GLuint fragment_shader_id = Shader::CompileShaderFromString(GL_FRAGMENT_SHADER, fragment_shader_string, error_log);
+            *error_log = *error_log + string("Shader Program Link:\n");
+            _program_id = Shader::LoadShader(attrib_names_seperated_by_comma, vertex_shader_id, fragment_shader_id, GL_TRUE, error_log);
+        }
+        else
+            _program_id = Shader::LoadShader(attrib_names_seperated_by_comma, Shader::CompileShaderFromString(GL_VERTEX_SHADER, vertex_shader_string), Shader::CompileShaderFromString(GL_FRAGMENT_SHADER, fragment_shader_string), GL_TRUE);
+
+        if (uniform_names_seperated_by_comma) 
+			_uniforms = Shader::GetUniformLocations(string(uniform_names_seperated_by_comma), _program_id);
+    }
+
+    ~Shader()
+    {
+        if (_program_id) glDeleteProgram(_program_id);
+        if (_uniforms) delete[] _uniforms;
+    }
+
+    void Activate()
+    {
+        glUseProgram(_program_id);
+    }
+
+	static GLuint CompileShaderFromString(GLenum type, const GLchar *shader_string, string *error_log = nullptr)
+	{
+		GLuint shader = glCreateShader(type);
+		glShaderSource(shader, 1, &shader_string, 0);
+		glCompileShader(shader);
+		GLint status;
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+		if (!status)
+		{
+			if (error_log)
+			{
+				GLsizei log_length;
+				glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
+				if (log_length > 0)
+				{
+					GLchar *log = new GLchar[log_length];
+					glGetShaderInfoLog(shader, log_length, &log_length, log);
+					*error_log = *error_log + string(log);
+					delete[] log;
+				}
+			}
+			if (shader) 
+				glDeleteShader(shader);
+			return 0;
+		}
+		return shader;
+	}
+
+    GLint UniformID(unsigned int uniform_position)
+    {
+        return _uniforms[uniform_position];
+    }
+};
+
+#endif

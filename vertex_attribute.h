@@ -6,9 +6,9 @@
 class VertexAttribute
 {
 public:
-    GLsizei component_count;
+	GLboolean normalized;
     GLenum component_type; 
-    GLboolean normalized;
+    GLsizei component_count;
 
     VertexAttribute(GLsizei component_count, GLenum component_type, GLboolean normalized)
     {

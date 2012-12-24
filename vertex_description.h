@@ -11,9 +11,9 @@ using namespace std;
 #endif
 
 class VertexDescription
-{
+{    
     GLsizei _vertex_size;
-    vector<VertexAttribute> _attribute_descriptions;
+	vector<VertexAttribute> _attribute_descriptions;
 
 public:
     VertexDescription()

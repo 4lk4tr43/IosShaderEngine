@@ -6,29 +6,21 @@
 #ifdef WIN32
 	#include "gl/glew.h"
 	#include "gl/glfw.h"
+	typedef __int32 GLfixed;
 #else
 	#include <OpenGLES/ES2/gl.h>
 	#include <OpenGLES/ES2/glext.h>
 #endif 
 
-
-
 #include "string_tokenizer.h"
 
 // An OpenGL context is needed to execute these methods, else the program will crash with an access violation
 class OpenGL
-{
-    static GLint _current_texture_unit = -1;
-    
-public:
-    
+{    
+public:    
     static void ActivateTextureUnit(GLint textureUnit)
     {
-        if (_current_texture_unit != textureUnit)
-        {
-			glActiveTexture(GL_TEXTURE0 + textureUnit);
-            _current_texture_unit = textureUnit;
-        }
+		glActiveTexture(GL_TEXTURE0 + textureUnit);
     }
 
     static char* AllExtensions()
