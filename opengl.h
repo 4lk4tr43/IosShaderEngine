@@ -85,6 +85,9 @@ public:
                 
             case GL_FIXED:
                 return sizeof(GLfixed);
+                
+            default:
+                return -1;
         }
     }
 };

@@ -4,6 +4,8 @@
 #include <cstdio>
 #include <fstream>
 #include <string>
+
+#include <iostream>
 using namespace std;
 
 class File
@@ -60,11 +62,22 @@ public:
 	{
 		ifstream i;
 		auto real_count = OpenBinary(count, i, path, start);
+        cout << real_count << endl;
 		char *buffer = new char[(unsigned long)real_count];
 		i.read(buffer, real_count);
+        cout << i.gcount() << endl;
 		i.close();
 		return buffer;
 	}
+    
+    static string ReadString(string path)
+    {
+        ifstream i(path);
+        string content_string;
+        content_string.assign(istreambuf_iterator<char>(i), istreambuf_iterator<char>());
+        i.close();
+        return content_string;
+    }
     
 	static streamsize Size(string path)
 	{

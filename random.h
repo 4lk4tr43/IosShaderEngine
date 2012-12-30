@@ -16,6 +16,13 @@ public:
 		u = uniform_int_distribution<T>(lower, upper);
 	}
     
+    T get()
+    {
+        T result;
+        operator>>(result);
+        return result;
+    }
+    
     void operator>>(T &x)
     {
         x = u(engine);
@@ -41,6 +48,13 @@ public:
 		SetSeed(seed);
 		u = uniform_real_distribution<T>(lower, upper);
 	}
+    
+    T get()
+    {
+        T result;
+        operator>>(result);
+        return result;
+    }
     
     void operator>>(T &x)
     {

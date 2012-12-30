@@ -11,11 +11,11 @@ class StringTokenizer
     vector<string> _lines;
     
 public:
-    StringTokenizer(string stringToSplit, string seperatorString = "\n")
+    StringTokenizer(string string_to_split, string seperatorString = "\n")
     {
-        auto string_to_split_size = stringToSplit.size();
+        auto string_to_split_size = string_to_split.size();
         auto cstring = new char[string_to_split_size + 1];
-        memcpy(cstring, (const void*)stringToSplit.c_str(), string_to_split_size * sizeof(char));
+        memcpy(cstring, (const void*)string_to_split.c_str(), string_to_split_size * sizeof(char));
         cstring[string_to_split_size] = '\0';
         auto cseperator = seperatorString.c_str();
         auto token = strtok(cstring, cseperator);
