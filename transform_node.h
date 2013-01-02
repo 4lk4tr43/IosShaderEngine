@@ -35,7 +35,7 @@ public:
     {
         return transpose(inverse(WorldMatrix()));
     }
-    
+
     mat4x4 WorldMatrix()
     {
         return translate(mat4_cast(rotation), position);

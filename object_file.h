@@ -24,7 +24,7 @@ class ObjectFile
 public:
 	static void Append(string path, const char *data, type_index typeinfo, size_t size)
     {
-        auto header_size = sizeof(size_t) + sizeof(type_index);
+        const size_t header_size = sizeof(size_t) + sizeof(type_index);
         char header[header_size];
         memcpy(header, &size, sizeof(size_t));
         memcpy(&header[sizeof(size_t)], (const void*)&typeinfo, sizeof(type_index));
@@ -35,7 +35,7 @@ public:
     static unsigned long Count(string path)
     {
         unsigned long count = 0;
-        auto file_size = File::size(path);
+        auto file_size = File::Size(path);
         auto header_size = sizeof(size_t) + sizeof(type_index);
         size_t size[1];
         ios::pos_type position = 0;
@@ -50,7 +50,7 @@ public:
     
     static void Get(string path, char *data, unsigned long index, type_index *typeinfo = nullptr)
     {
-        auto header_size = sizeof(size_t) + sizeof(type_index);
+        const size_t header_size = sizeof(size_t) + sizeof(type_index);
         auto index_position = GetIndexPosition(path, index);
         char header[header_size];
         File::Read(path, header, index_position, header_size);
@@ -61,7 +61,7 @@ public:
     
 	static char* GetNew(string path, unsigned long index, type_index *typeinfo = nullptr)
     {
-        auto header_size = sizeof(size_t) + sizeof(type_index);
+        const size_t header_size = sizeof(size_t) + sizeof(type_index);
         auto index_position = GetIndexPosition(path, index);
         char header[header_size];
         File::Read(path, header, index_position, header_size);
@@ -99,7 +99,7 @@ public:
     
 	static void Remove(string path, unsigned long index)
     {
-        auto header_size = sizeof(size_t) + sizeof(type_index);
+        const size_t header_size = sizeof(size_t) + sizeof(type_index);
         auto index_position = GetIndexPosition(path, index);
         char header[header_size];
         File::Read(path, header, index_position, header_size);
