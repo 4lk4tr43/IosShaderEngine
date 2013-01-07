@@ -1,11 +1,7 @@
 #ifndef root_h__
 #define root_h__
 
-#include <functional>
-using namespace std;
-
 #include "asset_manager.h"
-#include <mutex>
 
 class Root
 {
@@ -14,9 +10,9 @@ class Root
 public:
 	AssetManager *asset_manager;
     
-	Root(string folders_seperated_by_comma = "")
+	Root(string folders_separated_by_comma = "")
 	{
-		asset_manager = new AssetManager(folders_seperated_by_comma);
+		asset_manager = new AssetManager(folders_separated_by_comma);
 	}
     
 	~Root()
@@ -40,26 +36,6 @@ public:
 	{
 		_object_register.erase(object_name);
 	}
-
-    void Init(function<void (Root*)> init)
-    {
-        init(this);
-    }
-    
-    void Render(function<void (Root*)> render)
-    {
-        render(this);
-    }
-    
-    void Release(function<void (Root*)> release)
-    {
-        release(this);
-    }
-    
-    void Update(function<void (Root*)> update)
-    {
-        update(this);
-    }
 };
 
 #endif

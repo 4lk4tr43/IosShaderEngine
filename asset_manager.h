@@ -7,6 +7,7 @@
 using namespace std;
 
 #include "object_file.h"
+#include "post_shader.h"
 #include "string_tokenizer.h"
 
 class AssetManager
@@ -96,22 +97,22 @@ private:
 		return (char*)vertex_array_object;
 	}
 
-	char* LoadPostShaderNew(string absolute_file_path, GLchar *uniform_names_seperated_by_comma)
+	char* LoadPostShaderNew(string absolute_file_path, GLchar *uniform_names_separated_by_comma)
 	{
 		string error_log;
 		auto shader_string = File::ReadString(absolute_file_path);
-		auto result = new PostShader((GLchar*)shader_string.c_str(), uniform_names_seperated_by_comma, &error_log);
+		auto result = new PostShader((GLchar*)shader_string.c_str(), uniform_names_separated_by_comma, &error_log);
 		if (error_log.length())
 			cout << error_log << endl;
 		return (char*)result;
 	}
 
-	char * LoadShaderNew(string absolute_file_path_vertex, string absolute_file_path_fragment, GLchar* attribute_names_seperated_by_comma, GLchar * uniform_names_seperated_by_comma) 
+	char * LoadShaderNew(string absolute_file_path_vertex, string absolute_file_path_fragment, GLchar* attribute_names_separated_by_comma, GLchar * uniform_names_separated_by_comma) 
 	{
 		string error_log;
 		auto shader_string_vertex = File::ReadString(absolute_file_path_vertex);
 		auto shader_string_fragment = File::ReadString(absolute_file_path_fragment);
-		auto result = new Shader((GLchar*)shader_string_vertex.c_str(), (GLchar*)shader_string_fragment.c_str(), attribute_names_seperated_by_comma, uniform_names_seperated_by_comma, &error_log);
+		auto result = new Shader((GLchar*)shader_string_vertex.c_str(), (GLchar*)shader_string_fragment.c_str(), attribute_names_separated_by_comma, uniform_names_separated_by_comma, &error_log);
 		if (error_log.length())
 			cout << error_log << endl;
 		return (char*)result;
@@ -153,9 +154,9 @@ public:
 	StringTokenizer *base_folders;
     unsigned int root_folder_index;
 
-	AssetManager(string folders_seperated_by_comma = "")
+	AssetManager(string folders_separated_by_comma = "")
 	{
-		base_folders = new StringTokenizer(folders_seperated_by_comma, ",");
+		base_folders = new StringTokenizer(folders_separated_by_comma, ',');
 		root_folder_index = 0;
 	}
     
@@ -203,14 +204,14 @@ public:
 		return (VertexArrayObject*)result;
 	}
 
-	PostShader* GetPostShader(string file_name_or_absolute_path, GLchar *uniform_names_seperated_by_comma = nullptr)
+	PostShader* GetPostShader(string file_name_or_absolute_path, GLchar *uniform_names_separated_by_comma = nullptr)
 	{
 		auto asset_type_map = GetAssetTypeEntry(AssetType::POSTSHADER);
 		auto key = GenerateAssetKey(file_name_or_absolute_path);
 		char *result;
 		if (!asset_type_map->count(key))
 		{
-			result = LoadPostShaderNew(key, uniform_names_seperated_by_comma);
+			result = LoadPostShaderNew(key, uniform_names_separated_by_comma);
 			asset_type_map->operator[](key) = make_tuple(result, 1);
 		}
 		else
@@ -218,7 +219,7 @@ public:
 		return (PostShader*)result;
 	}
 
-	Shader* GetShader(string file_name_or_absolute_path_vertex, string file_name_or_absolute_path_fragment, GLchar* attribute_names_seperated_by_comma, GLchar *uniform_names_seperated_by_comma = nullptr)
+	Shader* GetShader(string file_name_or_absolute_path_vertex, string file_name_or_absolute_path_fragment, GLchar* attribute_names_separated_by_comma, GLchar *uniform_names_separated_by_comma = nullptr)
 	{
 		auto asset_type_map = GetAssetTypeEntry(AssetType::POSTSHADER);
 		auto key_vertex = GenerateAssetKey(file_name_or_absolute_path_vertex);
@@ -227,7 +228,7 @@ public:
 		char *result;
 		if (!asset_type_map->count(key))
 		{
-			result = LoadShaderNew(key_vertex, key_fragment, attribute_names_seperated_by_comma, uniform_names_seperated_by_comma);
+			result = LoadShaderNew(key_vertex, key_fragment, attribute_names_separated_by_comma, uniform_names_separated_by_comma);
 			asset_type_map->operator[](key) = make_tuple(result, 1);
 		}
 		else

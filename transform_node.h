@@ -15,30 +15,34 @@ public:
     vec3 position;
     quat rotation;
     
+	void LookAt(vec3 &position, vec3 &target, vec3 &up)
+	{
+		this->position = position;
+		rotation = inverse(quat_cast(mat3(lookAt(position, target, up))));
+	}
+
     void Move(vec3 &right_up_forward)
     {
         auto rotation_matrix = mat3_cast(rotation);
-        auto movement_vector = column(rotation_matrix, 0) * right_up_forward.x;
-        movement_vector = column(rotation_matrix, 1) * right_up_forward.y;
-        movement_vector = column(rotation_matrix, 2) * right_up_forward.z;
+        vec3 movement_vector = column(rotation_matrix, 0) * right_up_forward.x;
+        movement_vector += column(rotation_matrix, 1) * right_up_forward.y;
+        movement_vector += column(rotation_matrix, 2) * right_up_forward.z;
         position += movement_vector;
     }
-    
+
     void Rotate(vec3 &pitch_yaw_roll)
     {
-        quat increase_rotation(pitch_yaw_roll);
-        rotation = rotation * increase_rotation;
-        position = increase_rotation * position;
+        rotation = rotation * quat(pitch_yaw_roll);
     }
     
     mat4x4 ViewMatrix()
     {
-        return transpose(inverse(WorldMatrix()));
+        return inverse(WorldMatrix());
     }
 
     mat4x4 WorldMatrix()
     {
-        return translate(mat4_cast(rotation), position);
+        return translate(mat4(1.0f), position) * mat4_cast(rotation);
     }
 };
 

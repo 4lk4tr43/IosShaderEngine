@@ -34,10 +34,10 @@ public:
         cout << OpenGL::AllExtensions() << endl;
     }
 
-    static bool AreExtensionsSupported(GLchar *extensions_seperated_by_comma)
+    static bool AreExtensionsSupported(GLchar *extensions_separated_by_comma)
     {
         string extensions(OpenGL::AllExtensions());
-        StringTokenizer tokens(string(extensions_seperated_by_comma), string(","));
+        StringTokenizer tokens(string(extensions_separated_by_comma), ',');
         for (unsigned int i = 0; i < tokens.LineCount(); ++i)
         {
             if (extensions.find(tokens[i]) == string::npos)
@@ -63,29 +63,21 @@ public:
         switch (type_enum)
         {
             case GL_BYTE:
-                return sizeof(GLbyte);
-                
+                return sizeof(GLbyte);                
             case GL_UNSIGNED_BYTE:
-                return sizeof(GLubyte);
-                
+                return sizeof(GLubyte);                
             case GL_SHORT:
-                return sizeof(GLshort);
-                
+                return sizeof(GLshort);                
             case GL_UNSIGNED_SHORT:
-                return sizeof(GLushort);
-                
+                return sizeof(GLushort);                
             case GL_INT:
-                return sizeof(GLint);
-                
+                return sizeof(GLint);                
             case GL_UNSIGNED_INT:
-                return sizeof(GLuint);
-                
+                return sizeof(GLuint);                
             case GL_FLOAT:
-                return sizeof(GLfloat);
-                
+                return sizeof(GLfloat);                
             case GL_FIXED:
-                return sizeof(GLfixed);
-                
+                return sizeof(GLfixed);                
             default:
                 return -1;
         }

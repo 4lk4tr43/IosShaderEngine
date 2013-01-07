@@ -64,7 +64,7 @@ public:
     {
         GLsizei offset = 0;
         for (unsigned int i = 0; i < attributeIndex; ++i)
-            offset += _attribute_descriptions[i].AttributeSize();
+            offset += _attribute_descriptions[i].Size();
         return BUFFER_OFFSET(offset);
     }
     
@@ -76,10 +76,10 @@ public:
     void operator+=(VertexAttribute vertexAttribute)
     {
         _attribute_descriptions.push_back(vertexAttribute);
-        _vertex_size += vertexAttribute.AttributeSize();
+        _vertex_size += vertexAttribute.Size();
     }
     
-    GLsizei VertexSize()
+    GLsizei Size()
     {
         return _vertex_size;
     }

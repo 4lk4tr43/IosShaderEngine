@@ -74,10 +74,10 @@ public:
     {
         auto header_size = sizeof(size_t) + sizeof(type_index);
         auto buffer_size = header_size + size + File::Size(path);
-        auto buffer = new char[buffer_size];
+        auto buffer = new char[(unsigned int)buffer_size];
         auto index_position = GetIndexPosition(path, index);
         File::Read(path, buffer, 0, index_position);
-        memcpy(&buffer[index_position], (const void*)&size, sizeof(size_t));
+        memcpy(&buffer[(unsigned int)index_position], (const void*)&size, sizeof(size_t));
         memcpy(&buffer[(size_t)index_position + sizeof(size_t)], (const void*)&typeinfo, sizeof(type_index));
         File::Read(path, &buffer[(size_t)index_position + header_size + size], index_position);
         File::Write(path, buffer, buffer_size);
@@ -88,7 +88,7 @@ public:
     {
         auto header_size = sizeof(size_t) + sizeof(type_index);
         auto buffer_size = header_size + size + File::Size(path);
-        auto buffer = new char[buffer_size];
+        auto buffer = new char[(unsigned int)buffer_size];
         memcpy(buffer, (const void*)&size, sizeof(size_t));
         memcpy(&buffer[sizeof(size_t)], (const void*)&typeinfo, sizeof(type_index));
         memcpy(&buffer[header_size], (const void *)data, size);
@@ -104,9 +104,9 @@ public:
         char header[header_size];
         File::Read(path, header, index_position, header_size);
         auto buffer_size = File::Size(path) - header_size - ((size_t*)header)[0];
-        auto buffer = new char[buffer_size];
+        auto buffer = new char[(unsigned int)buffer_size];
         File::Read(path, buffer, 0, index_position);
-        File::Read(path, &buffer[index_position], (size_t)index_position + header_size + ((size_t*)header)[0]);
+        File::Read(path, &buffer[(unsigned int)index_position], (size_t)index_position + header_size + ((size_t*)header)[0]);
         File::Write(path, buffer, buffer_size);
         delete[] buffer;
     }
