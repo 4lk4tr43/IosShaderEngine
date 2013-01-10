@@ -65,7 +65,7 @@ public:
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, OpenGL::SizeofTypeByEnum(index_type) * index_count, data, indexUsage);
     }
     
-	void AddPackedVertices(GLenum vertex_usage, GLenum primitive_mode, VertexDescription vertex_description, GLvoid *data, GLsizei vertex_count)
+	void AddPackedVertices(GLenum vertex_usage, GLenum primitive_mode, VertexDescription &vertex_description, GLvoid *data, GLsizei vertex_count)
     {
         PrepareVao(primitive_mode, vertex_count, vertex_description);
 		GLuint vbo;
@@ -81,10 +81,12 @@ public:
         }
     }
 
-	void AddVertices(GLenum vertex_usage, GLenum primitive_mode, VertexDescription vertex_description, vector<GLvoid*> &data_buffers, GLsizei vertex_count)
+	void AddVertices(GLenum vertex_usage, GLenum primitive_mode, VertexDescription &vertex_description, vector<GLvoid*> &data_buffers, GLsizei vertex_count)
 	{
+		(size_t)vertex_description.AttributeCount() < data_buffers.size() ? (size_t)vertex_description.AttributeCount() : data_buffers.size();
 		PrepareVao(primitive_mode, vertex_count, vertex_description);
-		auto min_attributes_with_data = (GLsizei)min((size_t)vertex_description.AttributeCount(), data_buffers.size());
+		auto min_attributes_with_data = (GLsizei)((size_t)vertex_description.AttributeCount() < data_buffers.size() ? 
+			(size_t)vertex_description.AttributeCount() : data_buffers.size());
 		for (GLsizei i = 0; i < min_attributes_with_data; ++i)
 		{
 			GLuint vbo;
@@ -98,10 +100,11 @@ public:
 		}
 	}
 
-	void AddVertices(vector<GLenum> &vertex_usages, GLenum primitive_mode, VertexDescription vertex_description, vector<GLvoid*> &data_buffers, GLsizei vertex_count)
+	void AddVertices(vector<GLenum> &vertex_usages, GLenum primitive_mode, VertexDescription &vertex_description, vector<GLvoid*> &data_buffers, GLsizei vertex_count)
 	{
 		PrepareVao(primitive_mode, vertex_count, vertex_description);
-		auto min_attributes_with_data = (GLsizei)min((size_t)vertex_description.AttributeCount(), data_buffers.size());
+		auto min_attributes_with_data = (GLsizei)((size_t)vertex_description.AttributeCount() < data_buffers.size() ?
+			(size_t)vertex_description.AttributeCount() : data_buffers.size());
 		for (GLsizei i = 0; i < min_attributes_with_data; ++i)
 		{
 			GLuint vbo;

@@ -1,5 +1,5 @@
-#ifndef transform_node_h__
-#define transform_node_h__
+#ifndef transform_h__
+#define transform_h__
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_access.hpp"
@@ -7,14 +7,12 @@
 #include "glm/gtc/quaternion.hpp"
 using namespace glm;
 
-#include "node.h"
-
-class TransformNode : public Node
+class Transform
 {
 public:
     vec3 position;
     quat rotation;
-    
+
 	void LookAt(vec3 &position, vec3 &target, vec3 &up)
 	{
 		this->position = position;
@@ -29,6 +27,14 @@ public:
         movement_vector += column(rotation_matrix, 2) * right_up_forward.z;
         position += movement_vector;
     }
+
+	Transform operator*(Transform &parent)
+	{
+		Transform result;
+		result.position = parent.position + parent.rotation * position;
+		result.rotation = parent.rotation * rotation;
+		return result;
+	}
 
     void Rotate(vec3 &pitch_yaw_roll)
     {

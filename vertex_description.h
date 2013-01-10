@@ -28,17 +28,24 @@ public:
         return vertex_description;
     }
     
-    static VertexDescription PositionUV()
-    {
-        VertexDescription vertex_description = VertexDescription::Position();
-        vertex_description.AddAttribute(2, GL_FLOAT, GL_FALSE);
-        return vertex_description;
-    }
-    
+	static VertexDescription PositionColor()
+	{
+		VertexDescription vertex_description = VertexDescription::Position();
+		vertex_description.AddAttribute(4, GL_FLOAT, GL_FALSE);
+		return vertex_description;
+	}
+
     static VertexDescription PositionNormal()
     {
         VertexDescription vertex_description = VertexDescription::Position();
         vertex_description.AddAttribute(3, GL_FLOAT, GL_FALSE);
+        return vertex_description;
+    }
+    
+    static VertexDescription PositionUV()
+    {
+        VertexDescription vertex_description = VertexDescription::Position();
+        vertex_description.AddAttribute(2, GL_FLOAT, GL_FALSE);
         return vertex_description;
     }
     
