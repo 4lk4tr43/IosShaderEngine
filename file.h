@@ -8,6 +8,18 @@
 #include <iostream>
 using namespace std;
 
+#ifndef FILE_WRITE_SERIALIZED
+#define FILE_WRITE_SERIALIZED(path, object_ptr) {size_t _file_serialized_size; \
+	char *_file_data_serialized = (object_ptr)->SerializeNew(&_file_serialized_size); \
+	File::Write(path, _file_data_serialized, _file_serialized_size); delete[] _file_data_serialized;}
+#endif
+
+#ifndef FILE_READ_SERIALIZED_NEW
+#define FILE_READ_SERIALIZED(path, variable, class_name) {char *_file_data_serialized = File::ReadNew(path); \
+	variable = class_name::Deserialize(_file_data_serialized); \
+	delete[] _file_data_serialized;}
+#endif
+
 class File
 {
 	static void FileOutBinary(ofstream &o, const char *data, streamsize count)
@@ -62,10 +74,8 @@ public:
 	{
 		ifstream i;
 		auto real_count = OpenBinary(count, i, path, start);
-        cout << real_count << endl;
 		char *buffer = new char[(unsigned long)real_count];
 		i.read(buffer, real_count);
-        cout << i.gcount() << endl;
 		i.close();
 		return buffer;
 	}

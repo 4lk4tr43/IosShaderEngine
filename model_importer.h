@@ -1,5 +1,5 @@
-#ifndef mesh_manager_h__
-#define mesh_manager_h__
+#ifndef model_impoerter_h__
+#define model_impoerter_h__
 
 #include <iostream>
 #include <string>
@@ -11,20 +11,29 @@ using namespace std;
 
 #include "mesh.h"
 
-class MeshManager
+class ModelImporter
 {
 	Assimp::Importer _importer;
 	aiScene *_scene;
 
+	template <class T>
+	vector<T> CopyMemoryToVector(T* memory, size_t element_count)
+	{
+		vector<T> result;
+		for (size_t i = 0; i < element_count; ++i)
+			result.push_back(memory[i]);
+		return result;
+	}
+
 public:
 	class MeshManagerLoadException : exception {};
 
-	MeshManager()
+	ModelImporter()
 	{
 		_scene = nullptr;
 	}
 
-	~MeshManager()
+	~ModelImporter()
 	{
 		UnloadScene();
 	}
@@ -34,7 +43,7 @@ public:
 	{
 		UnloadScene();
 		_scene = (aiScene *)_importer.ReadFile(file_path, aiProcess_Triangulate | aiProcess_ImproveCacheLocality | 
-			aiProcess_JoinIdenticalVertices | aiProcess_OptimizeMeshes | post_process_steps);
+			aiProcess_JoinIdenticalVertices | post_process_steps);
 		if (!_scene)
 		{
 			throw MeshManagerLoadException();
@@ -47,7 +56,7 @@ public:
 	{
 		UnloadScene();
 		_scene = (aiScene *)_importer.ReadFileFromMemory(data, data_size, aiProcess_Triangulate | aiProcess_ImproveCacheLocality |
-			aiProcess_JoinIdenticalVertices | aiProcess_OptimizeMeshes| post_process_steps);
+			aiProcess_JoinIdenticalVertices | post_process_steps);
 		if (!_scene)
 		{
 			throw MeshManagerLoadException();
@@ -73,48 +82,58 @@ public:
 		mesh_data.primitive_type = GL_TRIANGLES;
 		mesh_data.vertex_count = mesh->mNumVertices;
 
-		if (use_position)
+		if (use_position && mesh->HasPositions())
 		{
-			mesh_data.vertex_data.push_back((void*)mesh->mVertices);
 			mesh_data.mesh_attributes.push_back(Mesh::MeshAttributeType::POSITION);
-			mesh_data.vertex_description.AddAttribute(3, GL_FLOAT, GL_FALSE);
+			VertexAttribute attribute(3, GL_FLOAT, GL_FALSE);
+			mesh_data.vertex_description += attribute;
+			mesh_data.vertex_data.push_back(CopyMemoryToVector<char>((char*)mesh->mVertices, attribute.Size() * mesh_data.vertex_count));
 		}
-		if (use_normal && mesh->HasNormals)
+		if (use_normal && mesh->HasNormals())
 		{
-			mesh_data.vertex_data.push_back((void*)mesh->mNormals);
 			mesh_data.mesh_attributes.push_back(Mesh::MeshAttributeType::NORMAL);
-			mesh_data.vertex_description.AddAttribute(3, GL_FLOAT, GL_FALSE);
+			VertexAttribute attribute(3, GL_FLOAT, GL_FALSE);
+			mesh_data.vertex_description += attribute;
+			mesh_data.vertex_data.push_back(CopyMemoryToVector<char>((char*)mesh->mNormals, attribute.Size() * mesh_data.vertex_count));
 		}
-		if (use_tangent && mesh->HasTangentsAndBitangents)
+		if (use_tangent && mesh->HasTangentsAndBitangents())
 		{
-			mesh_data.vertex_data.push_back((void*)mesh->mTangents);
 			mesh_data.mesh_attributes.push_back(Mesh::MeshAttributeType::TANGENT);
-			mesh_data.vertex_description.AddAttribute(3, GL_FLOAT, GL_FALSE);
+			VertexAttribute attribute(3, GL_FLOAT, GL_FALSE);
+			mesh_data.vertex_description += attribute;
+			mesh_data.vertex_data.push_back(CopyMemoryToVector<char>((char*)mesh->mTangents, attribute.Size() * mesh_data.vertex_count));
 		}
-		if (use_bitangent && mesh->HasTangentsAndBitangents)
+		if (use_bitangent && mesh->HasTangentsAndBitangents())
 		{
-			mesh_data.vertex_data.push_back((void*)mesh->mBitangents);
 			mesh_data.mesh_attributes.push_back(Mesh::MeshAttributeType::BITANGENT);
-			mesh_data.vertex_description.AddAttribute(3, GL_FLOAT, GL_FALSE);
+			VertexAttribute attribute(3, GL_FLOAT, GL_FALSE);
+			mesh_data.vertex_description += attribute;
+			mesh_data.vertex_data.push_back(CopyMemoryToVector<char>((char*)mesh->mBitangents, attribute.Size() * mesh_data.vertex_count));
 		}
-		if (mesh->HasTextureCoords)
+		if (use_uv_up_to_channel)
 		{
 			auto uv_channels_to_load = (use_uv_up_to_channel < mesh->GetNumUVChannels()) ?  use_uv_up_to_channel : mesh->GetNumUVChannels();
-			for (int j = 0; j < uv_channels_to_load; ++j)
+			for (unsigned int j = 0; j < uv_channels_to_load; ++j)
 			{
-				mesh_data.vertex_data.push_back((void*)mesh->mTextureCoords[j]);
+				if (!mesh->HasTextureCoords(j))
+					continue;
 				mesh_data.mesh_attributes.push_back(Mesh::MeshAttributeType::UV);
-				mesh_data.vertex_description.AddAttribute(2, GL_FLOAT, GL_FALSE);
+				VertexAttribute attribute(2, GL_FLOAT, GL_FALSE);
+				mesh_data.vertex_description += attribute;
+				mesh_data.vertex_data.push_back(CopyMemoryToVector<char>((char*)mesh->mTextureCoords[j], attribute.Size() * mesh_data.vertex_count));
 			}
 		}
-		if (mesh->HasVertexColors)
+		if (use_color_up_to_channel)
 		{
 			auto color_channels_to_load = (use_color_up_to_channel < mesh->GetNumColorChannels()) ?  use_color_up_to_channel : mesh->GetNumColorChannels();
-			for (int j = 0; j < color_channels_to_load; ++j)
+			for (unsigned int j = 0; j < color_channels_to_load; ++j)
 			{
-				mesh_data.vertex_data.push_back((void*)mesh->mColors[j]);
+				if (!mesh->HasVertexColors(j))
+					continue;
 				mesh_data.mesh_attributes.push_back(Mesh::MeshAttributeType::COLOR);
-				mesh_data.vertex_description.AddAttribute(4, GL_FLOAT, GL_FALSE);
+				VertexAttribute attribute(4, GL_FLOAT, GL_FALSE);
+				mesh_data.vertex_description += attribute;
+				mesh_data.vertex_data.push_back(CopyMemoryToVector<char>((char*)mesh->mColors[j], attribute.Size() * mesh_data.vertex_count));
 			}
 		}
 
