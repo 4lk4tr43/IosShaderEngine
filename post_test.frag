@@ -1,4 +1,4 @@
-varying vec2 uv_var;
+varying lowp vec2 uv_var;
 
 void main()
 {

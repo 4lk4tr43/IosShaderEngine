@@ -11,9 +11,14 @@ using namespace glm;
 #include "vertex_array_object.h"
 
 #define AXIS_CROSS_VERTEX_SHADER (GLchar*)"attribute vec3 position;attribute vec4 color;uniform mat4 model_view_projection;varying vec4 color_var;void main(){gl_Position=model_view_projection*vec4(position,1.0);color_var=color;}"
-#define AXIS_CROSS_VERTEX_SHADER_ATTRIB_NAMES (GLchar*)"position,color"
-#define AXIS_CROSS_SHADER_UNIFORM_NAMES (GLchar*)"model_view_projection"
-#define AXIS_CROSS_FRAGMENT_SHADER (GLchar*) "varying vec4 color_var;void main(){gl_FragColor=color_var;}"
+#define AXIS_CROSS_VERTEX_SHADER_ATTRIB_NAMES "position,color"
+#define AXIS_CROSS_SHADER_UNIFORM_NAMES "model_view_projection"
+
+#ifdef WIN32
+    #define AXIS_CROSS_FRAGMENT_SHADER (GLchar*) "varying lowp vec4 color_var;void main(){gl_FragColor=color_var;}"
+#else
+    #define AXIS_CROSS_FRAGMENT_SHADER (GLchar*) "varying lowp vec4 color_var;void main(){gl_FragColor=color_var;}"
+#endif
 
 static unsigned int _axis_cross_reference_count = 0;
 static Shader *_axis_cross_shader = nullptr;
@@ -57,7 +62,8 @@ class AxisCross
 		vertices.push_back((GLvoid*)axis_cross_vertices);
 		vertices.push_back((GLvoid*)axis_cross_colors);
 		_axis_cross_vao_array_object = new VertexArrayObject();
-		_axis_cross_vao_array_object->AddVertices(GL_STATIC_DRAW, GL_TRIANGLES, VertexDescription::PositionColor(), vertices, 9);	
+        auto vertex_description = VertexDescription::PositionColor();
+        _axis_cross_vao_array_object->AddVertices(GL_STATIC_DRAW, GL_TRIANGLES, vertex_description, vertices, (GLsizei)9);
 	}
 
 	void InitShader() 
@@ -66,7 +72,6 @@ class AxisCross
 			return;
 		string error_log;
 		_axis_cross_shader = new Shader(AXIS_CROSS_VERTEX_SHADER, AXIS_CROSS_FRAGMENT_SHADER, AXIS_CROSS_VERTEX_SHADER_ATTRIB_NAMES, AXIS_CROSS_SHADER_UNIFORM_NAMES, &error_log);
-
 	}
 
 public:

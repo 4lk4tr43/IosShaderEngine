@@ -82,7 +82,6 @@ public:
 		_memory = src;
 		_last_pop = _memory;
 		size_t new_size = 0;
-		bool has_next = false;
 		char *position = _memory;
 		while (true) 
 		{

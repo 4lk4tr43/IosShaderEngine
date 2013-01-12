@@ -1,4 +1,4 @@
-varying vec3 normal_var;
+varying lowp vec3 normal_var;
 
 void main()
 {

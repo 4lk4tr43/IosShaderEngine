@@ -25,19 +25,23 @@ void Init(Root *root)
 // 	mesh_manager.UnloadScene();
 // 	FILE_WRITE_SERIALIZED("test.txt", &mesh);
 	Mesh m;
-	FILE_READ_SERIALIZED("test.txt", m, Mesh);
+    string bundle_folder = root->asset_manager->base_folders->operator[](1);
+	FILE_READ_SERIALIZED(bundle_folder + string("test.txt"), m, Mesh);
 	vao = m.ConvertToVertexArrayObjectNew();
-
+    OpenGL::ErrorToConsole();
 	glEnable(GL_DEPTH_TEST);
 
 	shader = root->asset_manager->GetShader("vertex_test.vert", "fragment_test.frag", 
 		"position,normal", "model_view_projection_matrix,normal_matrix");
-
+    OpenGL::ErrorToConsole();
 	root->RegisterObject("Camera", new Transform());
-	root->GetObject<Transform*>("Camera")->LookAt(vec3(20.0f, 40.0f, 60.0f), vec3(.0f,.0f,.0f), vec3(.0f,1.0f,.0f));
+    auto v1 = vec3(20.0f, 40.0f, 60.0f);
+    auto v2 = vec3(.0f,.0f,.0f);
+    auto v3 = vec3(.0f,1.0f,.0f);
+	root->GetObject<Transform*>("Camera")->LookAt(v1, v2, v3);
 	root->RegisterObject("Perspective", new mat4(perspective(45.0f, 4.0f/3.0f, 1.0f, 300.0f)));
 	root->RegisterObject<PostShader*>("PostShader", root->asset_manager->GetPostShader("post_test.frag"));
-
+    OpenGL::ErrorToConsole();
 	models = new Transform();
 	models->position = vec3(0);
 	models->rotation = quat(vec3(0));
@@ -48,7 +52,8 @@ void Init(Root *root)
 
 void Update(Root *root)
 {
-	models->Rotate(vec3(.0f,.01f,.0f));
+    auto v1 = vec3(.0f,.01f,.0f);
+	models->Rotate(v1);
 }
 
 void Render(Root *root)

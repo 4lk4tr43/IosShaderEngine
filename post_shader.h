@@ -39,25 +39,25 @@ class PostShader : public Shader
     }
 
 public:
-    PostShader(GLuint fragment_shader_id, GLchar *uniform_names_separated_by_comma = nullptr, string *error_log = nullptr)
+    PostShader(GLuint fragment_shader_id, string uniform_names_separated_by_comma = "", string *error_log = nullptr)
     {        
 		_uniforms = nullptr;  
         LazyInitVertexStage();                
         ++_post_shader_reference_count;
 		_program_id = Shader::LoadShader(FULLSCREEN_QUAD_VERTEX_SHADER_ATTRIB_NAMES, _post_shader_quad_vertex_shader_id, fragment_shader_id, GL_FALSE, error_log);
-        if (uniform_names_separated_by_comma) 
-			_uniforms = Shader::GetUniformLocations(string(uniform_names_separated_by_comma), _program_id);
+        if (uniform_names_separated_by_comma.length())
+			_uniforms = Shader::GetUniformLocations(uniform_names_separated_by_comma, _program_id);
     }
 
-    PostShader(GLchar *fragment_shader_string, GLchar *uniform_names_separated_by_comma = nullptr, string *error_log = nullptr)
+    PostShader(GLchar *fragment_shader_string, string uniform_names_separated_by_comma = "", string *error_log = nullptr)
     {        
 		_uniforms = nullptr;  
         LazyInitVertexStage();                
         ++_post_shader_reference_count;
 		GLuint fragment_shader_id = Shader::CompileShaderFromString(GL_FRAGMENT_SHADER, fragment_shader_string, error_log);
         _program_id = Shader::LoadShader(FULLSCREEN_QUAD_VERTEX_SHADER_ATTRIB_NAMES, _post_shader_quad_vertex_shader_id, fragment_shader_id, GL_TRUE, error_log);  
-        if (uniform_names_separated_by_comma) 
-			_uniforms = Shader::GetUniformLocations(string(uniform_names_separated_by_comma), _program_id);
+        if (uniform_names_separated_by_comma.length())
+			_uniforms = Shader::GetUniformLocations(uniform_names_separated_by_comma, _program_id);
     }
 
     ~PostShader()

@@ -75,29 +75,10 @@ private:
 
 	char * LoadMeshBasedVaoNew(string absolute_file_path, GLenum vertex_usage, GLenum index_usage) 
 	{
-		auto vertex_array_object = new VertexArrayObject();
-		auto vertex_count = (GLsizei*)ObjectFile::GetNew(absolute_file_path, 0);
-		auto vertex_description = (VertexDescription*)ObjectFile::GetNew(absolute_file_path, 1);
-		auto primitive_mode = (GLenum*)ObjectFile::GetNew(absolute_file_path, 2);
-		auto vertices = (GLvoid*)ObjectFile::GetNew(absolute_file_path, 3);
-		vertex_array_object->AddPackedVertices(vertex_usage, *primitive_mode, *vertex_description, vertices, *vertex_count);
-		delete[] vertex_count;
-		delete[] vertex_description;
-		delete[] primitive_mode;
-		delete[] vertices;
-		auto index_count = (GLsizei*)ObjectFile::GetNew(absolute_file_path, 4);
-		if (!*index_count)
-			return (char*)vertex_array_object;
-		auto index_type = (GLenum*)ObjectFile::GetNew(absolute_file_path, 5);
-		auto indices = (GLvoid*)ObjectFile::GetNew(absolute_file_path, 6);
-		vertex_array_object->AddIndices(index_usage, *index_type, indices, *index_count);
-		delete[] index_count;
-		delete[] index_type;		
-		delete[] vertices;
-		return (char*)vertex_array_object;
+		return nullptr;
 	}
 
-	char* LoadPostShaderNew(string absolute_file_path, GLchar *uniform_names_separated_by_comma)
+	char* LoadPostShaderNew(string absolute_file_path, string uniform_names_separated_by_comma)
 	{
 		string error_log;
 		auto shader_string = File::ReadString(absolute_file_path);
@@ -107,7 +88,7 @@ private:
 		return (char*)result;
 	}
 
-	char * LoadShaderNew(string absolute_file_path_vertex, string absolute_file_path_fragment, GLchar* attribute_names_separated_by_comma, GLchar * uniform_names_separated_by_comma) 
+	char * LoadShaderNew(string absolute_file_path_vertex, string absolute_file_path_fragment, string attribute_names_separated_by_comma, string uniform_names_separated_by_comma)
 	{
 		string error_log;
 		auto shader_string_vertex = File::ReadString(absolute_file_path_vertex);
@@ -191,20 +172,10 @@ public:
 
 	VertexArrayObject* GetMeshBasedVertexArrayObject(string file_name_or_absolute_path, GLenum vertex_usage, GLenum index_usage)
 	{
-		auto asset_type_map = GetAssetTypeEntry(AssetType::MESH);
-		auto key = GenerateAssetKey(file_name_or_absolute_path);
-		char *result;
-		if (!asset_type_map->count(key))
-		{
-			result = LoadMeshBasedVaoNew(file_name_or_absolute_path, vertex_usage, index_usage);
-			asset_type_map->operator[](key) = make_tuple(result, 1);
-		}
-		else
-			result = IncrementAssetReferenceCount(key, asset_type_map);
-		return (VertexArrayObject*)result;
+		return nullptr;
 	}
 
-	PostShader* GetPostShader(string file_name_or_absolute_path, GLchar *uniform_names_separated_by_comma = nullptr)
+	PostShader* GetPostShader(string file_name_or_absolute_path, string uniform_names_separated_by_comma = "")
 	{
 		auto asset_type_map = GetAssetTypeEntry(AssetType::POSTSHADER);
 		auto key = GenerateAssetKey(file_name_or_absolute_path);
@@ -219,7 +190,7 @@ public:
 		return (PostShader*)result;
 	}
 
-	Shader* GetShader(string file_name_or_absolute_path_vertex, string file_name_or_absolute_path_fragment, GLchar* attribute_names_separated_by_comma, GLchar *uniform_names_separated_by_comma = nullptr)
+	Shader* GetShader(string file_name_or_absolute_path_vertex, string file_name_or_absolute_path_fragment, string attribute_names_separated_by_comma, string uniform_names_separated_by_comma = "")
 	{
 		auto asset_type_map = GetAssetTypeEntry(AssetType::POSTSHADER);
 		auto key_vertex = GenerateAssetKey(file_name_or_absolute_path_vertex);
