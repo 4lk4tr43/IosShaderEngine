@@ -73,7 +73,7 @@ private:
 		return File::ReadNew(absolute_file_path);
     }
 
-	char * LoadMeshNew(string absolute_file_path, GLenum vertex_usage, GLenum index_usage) 
+	char * LoadMeshBasedVaoNew(string absolute_file_path, GLenum vertex_usage, GLenum index_usage) 
 	{
 		auto vertex_array_object = new VertexArrayObject();
 		auto vertex_count = (GLsizei*)ObjectFile::GetNew(absolute_file_path, 0);
@@ -189,14 +189,14 @@ public:
 		return result;
     }
 
-	VertexArrayObject* GetMesh(string file_name_or_absolute_path, GLenum vertex_usage, GLenum index_usage)
+	VertexArrayObject* GetMeshBasedVertexArrayObject(string file_name_or_absolute_path, GLenum vertex_usage, GLenum index_usage)
 	{
 		auto asset_type_map = GetAssetTypeEntry(AssetType::MESH);
 		auto key = GenerateAssetKey(file_name_or_absolute_path);
 		char *result;
 		if (!asset_type_map->count(key))
 		{
-			result = LoadMeshNew(file_name_or_absolute_path, vertex_usage, index_usage);
+			result = LoadMeshBasedVaoNew(file_name_or_absolute_path, vertex_usage, index_usage);
 			asset_type_map->operator[](key) = make_tuple(result, 1);
 		}
 		else

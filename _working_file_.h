@@ -1,8 +1,3 @@
-
-#include "assimp/Importer.hpp"
-#include "assimp/scene.h"
-#include "assimp/postprocess.h"
-
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
@@ -14,6 +9,8 @@ using namespace glm;
 #include "transform.h"
 #include "axis_cross.h"
 #include "math_constants.h"
+#include "model_importer.h"
+#include "vertex_array_object.h"
 
 Transform *models;
 Shader *shader;
@@ -21,31 +18,15 @@ VertexArrayObject *vao;
 
 void Init(Root *root)
 {
-	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile( "teapot.dae",
-		aiProcess_Triangulate |
-		aiProcess_JoinIdenticalVertices |
-		aiProcess_SortByPType);
-	if (scene)
-		cout << "Scene loaded" << endl;
-
-	vao = new VertexArrayObject();
-	vector<GLvoid*> v;
-	v.push_back((GLvoid*)scene->mMeshes[0]->mVertices);
-	v.push_back((GLvoid*)scene->mMeshes[0]->mNormals);
-
-	vector<GLuint> indices;
-
-	for (unsigned int i = 0 ; i < scene->mMeshes[0]->mNumFaces ; ++i) 
-	{
-		const aiFace& Face = scene->mMeshes[0]->mFaces[i];
-		indices.push_back(Face.mIndices[0]);
-		indices.push_back(Face.mIndices[1]);
-		indices.push_back(Face.mIndices[2]);
-	}
-
-	vao->AddVertices(GL_STATIC_DRAW, GL_TRIANGLES, VertexDescription::PositionNormal(), v, scene->mMeshes[0]->mNumVertices);
-	vao->AddIndices(GL_STATIC_DRAW, GL_UNSIGNED_INT, (GLvoid*)&indices[0], indices.size());
+// 	MeshManager mesh_manager;
+// 	mesh_manager.LoadSceneFromFile("teapot.dae");
+// 	Mesh mesh = mesh_manager.GetMesh(0, true, true, false, false, 0, 0);
+// 	vao = mesh.ConvertToVertexArrayObjectNew();
+// 	mesh_manager.UnloadScene();
+// 	FILE_WRITE_SERIALIZED("test.txt", &mesh);
+	Mesh m;
+	FILE_READ_SERIALIZED("test.txt", m, Mesh);
+	vao = m.ConvertToVertexArrayObjectNew();
 
 	glEnable(GL_DEPTH_TEST);
 

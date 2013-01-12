@@ -4,6 +4,7 @@
 #include <vector>
 using namespace std;
 
+#include "memory_builder.h"
 #include "vertex_attribute.h"
 
 #ifndef BUFFER_OFFSET
@@ -16,6 +17,29 @@ class VertexDescription
 	vector<VertexAttribute> _attribute_descriptions;
 
 public:
+	char* SerializeNew(size_t *size = nullptr)
+	{
+		MemoryBuilder memory_builder;
+		for (auto iter = _attribute_descriptions.begin(); iter != _attribute_descriptions.end(); iter++)
+			memory_builder.Push(&*iter, sizeof(VertexAttribute));
+		return memory_builder.GetMemoryNew(size);
+	}
+
+	static VertexDescription Deserialize(char *serialized_data)
+	{
+		VertexDescription vertex_description;
+		MemoryBuilder memory_builder;
+		memory_builder.PointToSource(serialized_data);		
+		while(true) 
+		{
+			auto attribute = (VertexAttribute*)memory_builder.Pop();
+			if (!attribute)
+				break;
+			vertex_description += *attribute;
+		}
+		return vertex_description;
+	}
+
     VertexDescription()
     {
         _vertex_size = 0;
