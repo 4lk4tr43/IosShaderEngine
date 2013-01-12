@@ -68,15 +68,15 @@ protected:
 	}
 
 public:
-	Shader(GLuint vertex_shader_id, GLuint fragment_Shader_id, GLchar *attrib_names_separated_by_comma, GLchar *uniform_names_separated_by_comma = nullptr, string *errorLog = nullptr)
+	Shader(GLuint vertex_shader_id, GLuint fragment_Shader_id, string attrib_names_separated_by_comma, string uniform_names_separated_by_comma = "", string *errorLog = nullptr)
     {
         _uniforms = nullptr;
         _program_id = Shader::LoadShader(attrib_names_separated_by_comma, vertex_shader_id, fragment_Shader_id, GL_FALSE, errorLog);
-        if (uniform_names_separated_by_comma) 
-			_uniforms = Shader::GetUniformLocations(string(uniform_names_separated_by_comma), _program_id);
+        if (uniform_names_separated_by_comma.length())
+			_uniforms = Shader::GetUniformLocations(uniform_names_separated_by_comma, _program_id);
     }			
     
-	Shader(GLchar *vertex_shader_string, GLchar *fragment_shader_string, GLchar *attrib_names_separated_by_comma, GLchar *uniform_names_separated_by_comma = nullptr, string *error_log = nullptr)
+	Shader(GLchar *vertex_shader_string, GLchar *fragment_shader_string, string attrib_names_separated_by_comma, string uniform_names_separated_by_comma = "", string *error_log = nullptr)
     {            
         _uniforms = nullptr;    
         if (error_log)
@@ -88,8 +88,8 @@ public:
         else
             _program_id = Shader::LoadShader(attrib_names_separated_by_comma, Shader::CompileShaderFromString(GL_VERTEX_SHADER, vertex_shader_string), Shader::CompileShaderFromString(GL_FRAGMENT_SHADER, fragment_shader_string), GL_TRUE);
 
-        if (uniform_names_separated_by_comma) 
-			_uniforms = Shader::GetUniformLocations(string(uniform_names_separated_by_comma), _program_id);
+        if (uniform_names_separated_by_comma.length())
+			_uniforms = Shader::GetUniformLocations(uniform_names_separated_by_comma, _program_id);
     }
 
     ~Shader()
