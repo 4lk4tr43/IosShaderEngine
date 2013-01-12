@@ -11,9 +11,9 @@ protected:
 
     Shader() {}            
             
-    static GLint * GetUniformLocations(string names_seperated_by_comma, GLuint program)
+    static GLint * GetUniformLocations(string names_separated_by_comma, GLuint program)
     {
-        StringTokenizer tokens = StringTokenizer(names_seperated_by_comma, string(","));
+        StringTokenizer tokens = StringTokenizer(names_separated_by_comma, ',');
         GLint *locations = new GLint[tokens.LineCount()];
                 
         for (unsigned int i = 0; i < tokens.LineCount(); ++i) locations[i] = glGetUniformLocation(program, tokens[i].c_str());
@@ -46,10 +46,10 @@ protected:
         return GL_TRUE;
     }
 
-	static GLuint LoadShader(string attrib_names_seperated_by_comma, GLuint vertex_shader_id, GLuint fragment_shader_id, GLboolean delete_shaders_after_load = GL_TRUE, string *error_log = nullptr)
+	static GLuint LoadShader(string attrib_names_separated_by_comma, GLuint vertex_shader_id, GLuint fragment_shader_id, GLboolean delete_shaders_after_load = GL_TRUE, string *error_log = nullptr)
 	{
 		GLuint program = glCreateProgram();
-		StringTokenizer attrib_names = StringTokenizer(attrib_names_seperated_by_comma, string(","));
+		StringTokenizer attrib_names = StringTokenizer(attrib_names_separated_by_comma, ',');
 		glAttachShader(program, vertex_shader_id);
 		glAttachShader(program, fragment_shader_id);
 		for (GLuint i = 0; i < attrib_names.LineCount(); ++i) 
@@ -68,31 +68,28 @@ protected:
 	}
 
 public:
-	Shader(GLuint vertex_shader_id, GLuint fragment_Shader_id, GLchar *attrib_names_seperated_by_comma, GLchar *uniform_names_seperated_by_comma = nullptr, string *errorLog = nullptr)
+	Shader(GLuint vertex_shader_id, GLuint fragment_Shader_id, GLchar *attrib_names_separated_by_comma, GLchar *uniform_names_separated_by_comma = nullptr, string *errorLog = nullptr)
     {
         _uniforms = nullptr;
-        _program_id = Shader::LoadShader(attrib_names_seperated_by_comma, vertex_shader_id, fragment_Shader_id, GL_FALSE, errorLog);
-        if (uniform_names_seperated_by_comma) 
-			_uniforms = Shader::GetUniformLocations(string(uniform_names_seperated_by_comma), _program_id);
+        _program_id = Shader::LoadShader(attrib_names_separated_by_comma, vertex_shader_id, fragment_Shader_id, GL_FALSE, errorLog);
+        if (uniform_names_separated_by_comma) 
+			_uniforms = Shader::GetUniformLocations(string(uniform_names_separated_by_comma), _program_id);
     }			
     
-	Shader(GLchar *vertex_shader_string, GLchar *fragment_shader_string, GLchar *attrib_names_seperated_by_comma, GLchar *uniform_names_seperated_by_comma = nullptr, string *error_log = nullptr)
+	Shader(GLchar *vertex_shader_string, GLchar *fragment_shader_string, GLchar *attrib_names_separated_by_comma, GLchar *uniform_names_separated_by_comma = nullptr, string *error_log = nullptr)
     {            
         _uniforms = nullptr;    
         if (error_log)
         {                
-            *error_log = *error_log + string("Vertex Shader Compile:\n");
             GLuint vertex_shader_id = Shader::CompileShaderFromString(GL_VERTEX_SHADER, vertex_shader_string, error_log);
-            *error_log = *error_log + string("Fragment Shader Compile:\n");
             GLuint fragment_shader_id = Shader::CompileShaderFromString(GL_FRAGMENT_SHADER, fragment_shader_string, error_log);
-            *error_log = *error_log + string("Shader Program Link:\n");
-            _program_id = Shader::LoadShader(attrib_names_seperated_by_comma, vertex_shader_id, fragment_shader_id, GL_TRUE, error_log);
+            _program_id = Shader::LoadShader(attrib_names_separated_by_comma, vertex_shader_id, fragment_shader_id, GL_TRUE, error_log);
         }
         else
-            _program_id = Shader::LoadShader(attrib_names_seperated_by_comma, Shader::CompileShaderFromString(GL_VERTEX_SHADER, vertex_shader_string), Shader::CompileShaderFromString(GL_FRAGMENT_SHADER, fragment_shader_string), GL_TRUE);
+            _program_id = Shader::LoadShader(attrib_names_separated_by_comma, Shader::CompileShaderFromString(GL_VERTEX_SHADER, vertex_shader_string), Shader::CompileShaderFromString(GL_FRAGMENT_SHADER, fragment_shader_string), GL_TRUE);
 
-        if (uniform_names_seperated_by_comma) 
-			_uniforms = Shader::GetUniformLocations(string(uniform_names_seperated_by_comma), _program_id);
+        if (uniform_names_separated_by_comma) 
+			_uniforms = Shader::GetUniformLocations(string(uniform_names_separated_by_comma), _program_id);
     }
 
     ~Shader()

@@ -8,13 +8,13 @@
 #define FULLSCREEN_QUAD_VERTEX_SHADER_ATTRIB_NAMES (GLchar*)"position,uv"
 
 static unsigned int _post_shader_reference_count = 0;
-static GLuint _post_shader_quad_vertex_shader_id = 0, _vao = 0, _vbo = 0;
+static GLuint _post_shader_quad_vertex_shader_id = 0, _post_shader_vao_id = 0, _post_shader_vbo_id = 0;
 
 class PostShader : public Shader
 {
-    static void InitializeVertexStageOnDemand()
+    static void LazyInitVertexStage()
     {
-        if (!_vao)
+        if (!_post_shader_vao_id)
         {
             const GLfloat vertexBuffer[] =
             {
@@ -25,10 +25,10 @@ class PostShader : public Shader
             };
   
             GLsizei vertexSize = sizeof(GLfloat) * 4;        
-            glGenVertexArraysOES(1, &_vao);
-            glBindVertexArrayOES(_vao);           
-            glGenBuffers(1, &_vbo);	
-            glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+            glGenVertexArraysOES(1, &_post_shader_vao_id);
+            glBindVertexArrayOES(_post_shader_vao_id);           
+            glGenBuffers(1, &_post_shader_vbo_id);	
+            glBindBuffer(GL_ARRAY_BUFFER, _post_shader_vbo_id);
             glBufferData(GL_ARRAY_BUFFER,  vertexSize * 4, vertexBuffer, GL_STATIC_DRAW);     
             glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, vertexSize, 0);
             glEnableVertexAttribArray(0);
@@ -39,25 +39,25 @@ class PostShader : public Shader
     }
 
 public:
-    PostShader(GLuint fragment_shader_id, GLchar *uniform_names_seperated_by_comma = nullptr, string *error_log = nullptr)
+    PostShader(GLuint fragment_shader_id, GLchar *uniform_names_separated_by_comma = nullptr, string *error_log = nullptr)
     {        
 		_uniforms = nullptr;  
-        InitializeVertexStageOnDemand();                
+        LazyInitVertexStage();                
         ++_post_shader_reference_count;
 		_program_id = Shader::LoadShader(FULLSCREEN_QUAD_VERTEX_SHADER_ATTRIB_NAMES, _post_shader_quad_vertex_shader_id, fragment_shader_id, GL_FALSE, error_log);
-        if (uniform_names_seperated_by_comma) 
-			_uniforms = Shader::GetUniformLocations(string(uniform_names_seperated_by_comma), _program_id);
+        if (uniform_names_separated_by_comma) 
+			_uniforms = Shader::GetUniformLocations(string(uniform_names_separated_by_comma), _program_id);
     }
 
-    PostShader(GLchar *fragment_shader_string, GLchar *uniform_names_seperated_by_comma = nullptr, string *error_log = nullptr)
+    PostShader(GLchar *fragment_shader_string, GLchar *uniform_names_separated_by_comma = nullptr, string *error_log = nullptr)
     {        
 		_uniforms = nullptr;  
-        InitializeVertexStageOnDemand();                
+        LazyInitVertexStage();                
         ++_post_shader_reference_count;
 		GLuint fragment_shader_id = Shader::CompileShaderFromString(GL_FRAGMENT_SHADER, fragment_shader_string, error_log);
         _program_id = Shader::LoadShader(FULLSCREEN_QUAD_VERTEX_SHADER_ATTRIB_NAMES, _post_shader_quad_vertex_shader_id, fragment_shader_id, GL_TRUE, error_log);  
-        if (uniform_names_seperated_by_comma) 
-			_uniforms = Shader::GetUniformLocations(string(uniform_names_seperated_by_comma), _program_id);
+        if (uniform_names_separated_by_comma) 
+			_uniforms = Shader::GetUniformLocations(string(uniform_names_separated_by_comma), _program_id);
     }
 
     ~PostShader()
@@ -81,15 +81,15 @@ public:
                 glDeleteShader(_post_shader_quad_vertex_shader_id);
                 _post_shader_quad_vertex_shader_id = 0;
             }
-            if (_vbo) 
+            if (_post_shader_vbo_id) 
             {
-                glDeleteBuffers(1, &_vbo);
-                _vbo = 0;
+                glDeleteBuffers(1, &_post_shader_vbo_id);
+                _post_shader_vbo_id = 0;
             }
-            if (_vao)
+            if (_post_shader_vao_id)
             {
-                glDeleteVertexArraysOES(1, &_vao);
-                _vao = 0;
+                glDeleteVertexArraysOES(1, &_post_shader_vao_id);
+                _post_shader_vao_id = 0;
             }
         }
     }
@@ -97,7 +97,7 @@ public:
     void Draw()
     {
 		Activate();
-        glBindVertexArrayOES(_vao); 
+        glBindVertexArrayOES(_post_shader_vao_id); 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);            
     }
 };

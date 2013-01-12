@@ -4,6 +4,7 @@
 #include <vector>
 using namespace std;
 
+#include "memory_builder.h"
 #include "vertex_attribute.h"
 
 #ifndef BUFFER_OFFSET
@@ -16,6 +17,29 @@ class VertexDescription
 	vector<VertexAttribute> _attribute_descriptions;
 
 public:
+	char* SerializeNew(size_t *size = nullptr)
+	{
+		MemoryBuilder memory_builder;
+		for (auto iter = _attribute_descriptions.begin(); iter != _attribute_descriptions.end(); iter++)
+			memory_builder.Push(&*iter, sizeof(VertexAttribute));
+		return memory_builder.GetMemoryNew(size);
+	}
+
+	static VertexDescription Deserialize(char *serialized_data)
+	{
+		VertexDescription vertex_description;
+		MemoryBuilder memory_builder;
+		memory_builder.PointToSource(serialized_data);		
+		while(true) 
+		{
+			auto attribute = (VertexAttribute*)memory_builder.Pop();
+			if (!attribute)
+				break;
+			vertex_description += *attribute;
+		}
+		return vertex_description;
+	}
+
     VertexDescription()
     {
         _vertex_size = 0;
@@ -28,17 +52,24 @@ public:
         return vertex_description;
     }
     
-    static VertexDescription PositionUV()
-    {
-        VertexDescription vertex_description = VertexDescription::Position();
-        vertex_description.AddAttribute(2, GL_FLOAT, GL_FALSE);
-        return vertex_description;
-    }
-    
+	static VertexDescription PositionColor()
+	{
+		VertexDescription vertex_description = VertexDescription::Position();
+		vertex_description.AddAttribute(4, GL_FLOAT, GL_FALSE);
+		return vertex_description;
+	}
+
     static VertexDescription PositionNormal()
     {
         VertexDescription vertex_description = VertexDescription::Position();
         vertex_description.AddAttribute(3, GL_FLOAT, GL_FALSE);
+        return vertex_description;
+    }
+    
+    static VertexDescription PositionUV()
+    {
+        VertexDescription vertex_description = VertexDescription::Position();
+        vertex_description.AddAttribute(2, GL_FLOAT, GL_FALSE);
         return vertex_description;
     }
     
@@ -64,7 +95,7 @@ public:
     {
         GLsizei offset = 0;
         for (unsigned int i = 0; i < attributeIndex; ++i)
-            offset += _attribute_descriptions[i].AttributeSize();
+            offset += _attribute_descriptions[i].Size();
         return BUFFER_OFFSET(offset);
     }
     
@@ -76,10 +107,10 @@ public:
     void operator+=(VertexAttribute vertexAttribute)
     {
         _attribute_descriptions.push_back(vertexAttribute);
-        _vertex_size += vertexAttribute.AttributeSize();
+        _vertex_size += vertexAttribute.Size();
     }
     
-    GLsizei VertexSize()
+    GLsizei Size()
     {
         return _vertex_size;
     }

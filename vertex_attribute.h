@@ -17,7 +17,7 @@ public:
         this->normalized = normalized;
     }
     
-    GLsizei AttributeSize()
+    GLsizei Size()
     {
         return component_count * OpenGL::SizeofTypeByEnum(component_type);
     }

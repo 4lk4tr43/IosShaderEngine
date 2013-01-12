@@ -11,20 +11,12 @@ class StringTokenizer
     vector<string> _lines;
     
 public:
-    StringTokenizer(string string_to_split, string seperatorString = "\n")
+    StringTokenizer(string string_to_split, char delimiter = '\n')
     {
-        auto string_to_split_size = string_to_split.size();
-        auto cstring = new char[string_to_split_size + 1];
-        memcpy(cstring, (const void*)string_to_split.c_str(), string_to_split_size * sizeof(char));
-        cstring[string_to_split_size] = '\0';
-        auto cseperator = seperatorString.c_str();
-        auto token = strtok(cstring, cseperator);
-        while (token)
-        {
-            _lines.push_back(string(token));
-            token = strtok(0, cseperator);
-        }
-        delete[] cstring;
+		stringstream string_stream(string_to_split);
+		string item;
+		while(getline(string_stream, item, delimiter))
+			_lines.push_back(item);
     }
     
     size_t LineCount()
