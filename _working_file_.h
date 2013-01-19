@@ -18,18 +18,21 @@ VertexArrayObject *vao;
 
 void Init(Root *root)
 {
-// 	MeshManager mesh_manager;
-// 	mesh_manager.LoadSceneFromFile("teapot.dae");
-// 	Mesh mesh = mesh_manager.GetMesh(0, true, true, false, false, 0, 0);
-// 	vao = mesh.ConvertToVertexArrayObjectNew();
-// 	mesh_manager.UnloadScene();
-// 	FILE_WRITE_SERIALIZED("test.txt", &mesh);
-	Mesh m;
 #ifdef WIN32
-	string bundle_folder("");
+    string bundle_folder("");
+    
+    ModelImporter mesh_manager;
+ 	mesh_manager.LoadSceneFromFile("teapot.dae");
+ 	Mesh mesh = mesh_manager.GetMesh(0, true, true, false, false, 0, 0);
+ 	vao = mesh.ConvertToVertexArrayObjectNew();
+ 	mesh_manager.UnloadScene();
+ 	FILE_WRITE_SERIALIZED("test.txt", &mesh);
 #else
 	string bundle_folder = root->asset_manager->base_folders->operator[](1);
 #endif
+    
+	Mesh m;
+    
 	FILE_READ_SERIALIZED(bundle_folder + string("test.txt"), m, Mesh);
 	vao = m.ConvertToVertexArrayObjectNew();
     OpenGL::ErrorToConsole();
