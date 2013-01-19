@@ -15,7 +15,7 @@ using namespace glm;
 #define AXIS_CROSS_SHADER_UNIFORM_NAMES "model_view_projection"
 
 #ifdef WIN32
-    #define AXIS_CROSS_FRAGMENT_SHADER (GLchar*) "varying lowp vec4 color_var;void main(){gl_FragColor=color_var;}"
+    #define AXIS_CROSS_FRAGMENT_SHADER (GLchar*) "varying vec4 color_var;void main(){gl_FragColor=color_var;}"
 #else
     #define AXIS_CROSS_FRAGMENT_SHADER (GLchar*) "varying lowp vec4 color_var;void main(){gl_FragColor=color_var;}"
 #endif

@@ -2,9 +2,12 @@
 #define object_file_h__
 
 #include <memory>
-#include <typeindex>
+//#include <typeindex>
+#include <typeinfo>
 
 #include "file.h"
+
+typedef type_info type_index;
 
 class ObjectFile
 {

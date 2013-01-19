@@ -32,14 +32,14 @@ class File
 	{
 		if (!count)
 		{
-			i.open(path, ios::in | ios::binary | ios::ate);
+			i.open(path.c_str(), ios::in | ios::binary | ios::ate);
 			auto real_count = i.tellg();
 			i.seekg(start, ios::beg);
 			return real_count;
 		}
 		else
 		{
-			i.open(path, ios::in | ios::binary | ios::beg);
+			i.open(path.c_str(), ios::in | ios::binary);
 			i.seekg(start, ios::beg);
 			return count;
 		}
@@ -48,7 +48,7 @@ class File
 public:
 	static void Append(string path, const char *data, streamsize count)
 	{
-		ofstream o(path, ios::out | ios::binary | ios::app);
+		ofstream o(path.c_str(), ios::out | ios::binary | ios::app);
 		FileOutBinary(o, data, count);
 	}
     
@@ -59,7 +59,7 @@ public:
     
     static bool Exists(string path)
     {
-        ifstream i(path);
+        ifstream i(path.c_str());
         return i.good();
     }
     
@@ -82,7 +82,7 @@ public:
     
     static string ReadString(string path)
     {
-        ifstream i(path);
+        ifstream i(path.c_str());
         string content_string;
         content_string.assign(istreambuf_iterator<char>(i), istreambuf_iterator<char>());
         i.close();
@@ -91,7 +91,7 @@ public:
     
 	static streamsize Size(string path)
 	{
-		ifstream i(path, ios::in | ios::binary | ios::ate);
+		ifstream i(path.c_str(), ios::in | ios::binary | ios::ate);
 		auto size = i.tellg();
 		i.close();
 		return size;
@@ -99,7 +99,7 @@ public:
 
 	static void Write(string path, const char *data, streamsize count)
 	{
-		ofstream o(path, ios::out | ios::binary | ios::trunc);
+		ofstream o(path.c_str(), ios::out | ios::binary | ios::trunc);
 		FileOutBinary(o, data, count);
 	}
 };
