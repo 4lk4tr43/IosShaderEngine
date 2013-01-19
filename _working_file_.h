@@ -25,7 +25,11 @@ void Init(Root *root)
 // 	mesh_manager.UnloadScene();
 // 	FILE_WRITE_SERIALIZED("test.txt", &mesh);
 	Mesh m;
-    string bundle_folder = root->asset_manager->base_folders->operator[](1);
+#ifdef WIN32
+	string bundle_folder("");
+#else
+	string bundle_folder = root->asset_manager->base_folders->operator[](1);
+#endif
 	FILE_READ_SERIALIZED(bundle_folder + string("test.txt"), m, Mesh);
 	vao = m.ConvertToVertexArrayObjectNew();
     OpenGL::ErrorToConsole();
