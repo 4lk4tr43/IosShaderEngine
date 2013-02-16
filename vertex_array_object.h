@@ -76,7 +76,14 @@ public:
         for (GLsizei i = 0; i < vertex_description.AttributeCount(); ++i)
         {
             VertexAttribute attribute = vertex_description[i];
-            glVertexAttribPointer(i, attribute.component_count, attribute.component_type, attribute.normalized, _vertex_size, vertex_description.AttributeOffset(i));
+			if (OpenGL::IsIntegerType(attribute.component_type))
+			{
+				glVertexAttribIPointer(i, attribute.component_count, attribute.component_type, _vertex_size, vertex_description.AttributeOffset(i));
+			} 
+			else
+			{
+				glVertexAttribPointer(i, attribute.component_count, attribute.component_type, attribute.normalized, _vertex_size, vertex_description.AttributeOffset(i));
+			}
             glEnableVertexAttribArray(i);
         }
     }
@@ -95,7 +102,10 @@ public:
 			VertexAttribute attribute = vertex_description[i];
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			glBufferData(GL_ARRAY_BUFFER, attribute.Size() * vertex_count, data_buffers[i], vertex_usage);
-			glVertexAttribPointer(i, attribute.component_count, attribute.component_type, attribute.normalized, 0, 0);
+			if (OpenGL::IsIntegerType(attribute.component_type))			
+				glVertexAttribIPointer(i, attribute.component_count, attribute.component_type, 0, 0);
+			else			
+				glVertexAttribPointer(i, attribute.component_count, attribute.component_type, attribute.normalized, 0, 0);
 			glEnableVertexAttribArray(i);
 		}
 	}
@@ -113,7 +123,14 @@ public:
 			VertexAttribute attribute = vertex_description[i];
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			glBufferData(GL_ARRAY_BUFFER, attribute.Size() * vertex_count, data_buffers[i], vertex_usages[i]);
-			glVertexAttribPointer(i, attribute.component_count, attribute.component_type, attribute.normalized, 0, 0);
+			if (OpenGL::IsIntegerType(attribute.component_type))
+			{
+				glVertexAttribIPointer(i, attribute.component_count, attribute.component_type, 0, 0);
+			}
+			else
+			{
+				glVertexAttribPointer(i, attribute.component_count, attribute.component_type, attribute.normalized, 0, 0);
+			}
 			glEnableVertexAttribArray(i);
 		}
 	}

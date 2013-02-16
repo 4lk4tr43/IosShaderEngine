@@ -12,6 +12,8 @@ using namespace glm;
 #include "model_importer.h"
 #include "vertex_array_object.h"
 
+#include "tree_node.h"
+
 Transform *models;
 Shader *shader;
 VertexArrayObject *vao;
@@ -22,31 +24,47 @@ void Init(Root *root)
     string bundle_folder("");
     
     ModelImporter mesh_manager;
- 	mesh_manager.LoadSceneFromFile("teapot.dae");
- 	Mesh mesh = mesh_manager.GetMesh(0, true, true, false, false, 0, 0);
- 	vao = mesh.ConvertToVertexArrayObjectNew();
+	mesh_manager.LoadSceneFromFile("TubeSkeletal.dae");
+ 	Mesh mesh = mesh_manager.GetMesh(0, 4, true, true, false, false, 0, 0);
+	
+	auto skeleton = mesh_manager.GetMeshSkeletonNew(0);
+
  	mesh_manager.UnloadScene();
- 	FILE_WRITE_SERIALIZED("test.txt", &mesh);
+	
+ 	FILE_WRITE_SERIALIZED("test.mesh", &mesh);
+	FILE_WRITE_SERIALIZED("test.skeleton", skeleton)
+	delete skeleton;
+
 #else
 	string bundle_folder = root->asset_manager->base_folders->operator[](1);
 #endif
     
-	Mesh m;
-    
-	FILE_READ_SERIALIZED(bundle_folder + string("test.txt"), m, Mesh);
+	Mesh m;    
+	FILE_READ_SERIALIZED(bundle_folder + string("test.mesh"), m, Mesh);
 	vao = m.ConvertToVertexArrayObjectNew();
+
+ 	Skeleton *s;
+ 	FILE_READ_SERIALIZED_NEW(bundle_folder + string("test.skeleton"), s, Skeleton);
+ 	root->RegisterObject<Skeleton*>("Skeleton", s);
+
+	auto abst = s->GetAbsoluteTransformations();
+	auto absm = new vector<mat4>();
+	for (auto iter = abst.begin(); iter != abst.end(); iter++)
+		absm->push_back(mat4()/*(*iter).WorldMatrix()*/);
+	root->RegisterObject<vector<mat4>*>("Pose", absm);
+
     OpenGL::ErrorToConsole();
 	glEnable(GL_DEPTH_TEST);
 
-	shader = root->asset_manager->GetShader("vertex_test.vert", "fragment_test.frag", 
-		"position,normal", "model_view_projection_matrix,normal_matrix");
+	shader = root->asset_manager->GetShader("vertex_bone_test.vert", "fragment_test.frag", 
+		"position,normal,bone_ids,bone_weights", "model_view_projection_matrix,normal_matrix,bones");
     OpenGL::ErrorToConsole();
 	root->RegisterObject("Camera", new Transform());
-    auto v1 = vec3(20.0f, 40.0f, 60.0f);
+    auto v1 = vec3(60.0f, 100.0f, 140.0f);
     auto v2 = vec3(.0f,.0f,.0f);
     auto v3 = vec3(.0f,1.0f,.0f);
 	root->GetObject<Transform*>("Camera")->LookAt(v1, v2, v3);
-	root->RegisterObject("Perspective", new mat4(perspective(45.0f, 4.0f/3.0f, 1.0f, 300.0f)));
+	root->RegisterObject<mat4*>("Perspective", new mat4(perspective(45.0f, 4.0f/3.0f, 1.0f, 300.0f)));
 	root->RegisterObject<PostShader*>("PostShader", root->asset_manager->GetPostShader("post_test.frag"));
     OpenGL::ErrorToConsole();
 	models = new Transform();
@@ -76,9 +94,13 @@ void Render(Root *root)
 	root->GetObject<AxisCross*>("AxisCross")->Draw(vp, 50);
 
 	auto mvp = vp * models->WorldMatrix();
+	auto pose = root->GetObject<vector<mat4>*>("Pose");
+	//pose->operator[](0) = mat4(0);	
+
 	shader->Activate();
 	glUniformMatrix4fv(shader->UniformID(0), 1, GL_FALSE, value_ptr(mvp));
 	glUniformMatrix4fv(shader->UniformID(1), 1, GL_FALSE, value_ptr(transpose(inverse(models->WorldMatrix()))));
+	glUniformMatrix4fv(shader->UniformID(2), 1, GL_FALSE, value_ptr(pose->operator[](0)));
 	vao->Draw();
 
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -95,4 +117,5 @@ void Release(Root *root)
  	delete root->GetObject<AxisCross*>("AxisCross");
 	delete vao;
  	delete models;
+	delete root->GetObject<Skeleton*>("Skeleton");
 }

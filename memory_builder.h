@@ -4,7 +4,7 @@
 #include <iostream>
 
 class MemoryBuilder
-{	
+{
 	bool _has_allocated;
 	char *_memory;
 	char *_last_pop;
@@ -58,6 +58,15 @@ public:
 			delete[] _memory;
 	}
 
+	template <class T>
+	static vector<T> CopyMemoryToVector(T* memory, size_t element_count)
+	{
+		vector<T> result;
+		for (size_t i = 0; i < element_count; ++i)
+			result.push_back(memory[i]);
+		return result;
+	}
+
 	char* GetMemory(size_t *size = nullptr)
 	{
 		if (size)
@@ -83,7 +92,7 @@ public:
 		_last_pop = _memory;
 		size_t new_size = 0;
 		char *position = _memory;
-		while (true) 
+		while (true)
 		{
 			new_size += sizeof(size_t) + sizeof(bool) + GetObjectSize(position);
 			if (IsLastObject(position))
@@ -108,6 +117,13 @@ public:
 		return object;
 	}
 
+	template <class T>
+	vector<T> PopVector()
+	{
+		auto element_count = *(size_t*)Pop();
+		return CopyMemoryToVector((T*)Pop(), element_count);
+	}
+
 	void Push(void* src, size_t size)
 	{
 		auto new_size = _current_size + sizeof(size_t) + sizeof(bool) + size;
@@ -127,6 +143,14 @@ public:
 		_current_size = new_size;
 		_memory = new_memory;
 		_last_pop = _memory;
+	}
+
+	template <class T>
+	void PushVector(vector<T> &vec)
+	{
+		auto vector_size = vec.size();
+		Push(&vector_size, sizeof(size_t));
+		Push(&vec[0], sizeof(T) * vector_size);
 	}
 };
 

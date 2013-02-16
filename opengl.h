@@ -57,6 +57,12 @@ public:
         string extensions(OpenGL::AllExtensions());
         return extensions.find(extension_to_find) != string::npos;
     }
+
+	static bool IsIntegerType(GLenum type)
+	{
+		return type == GL_BYTE || type == GL_UNSIGNED_BYTE || type == GL_SHORT || type == GL_UNSIGNED_SHORT ||
+			type == GL_INT || type == GL_UNSIGNED_INT;
+	}
     
     static GLsizei SizeofTypeByEnum(GLenum type_enum)
     {

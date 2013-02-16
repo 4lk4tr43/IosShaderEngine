@@ -14,11 +14,18 @@ using namespace std;
 	File::Write(path, _file_data_serialized, _file_serialized_size); delete[] _file_data_serialized;}
 #endif
 
-#ifndef FILE_READ_SERIALIZED_NEW
+#ifndef FILE_READ_SERIALIZED
 #define FILE_READ_SERIALIZED(path, variable, class_name) {char *_file_data_serialized = File::ReadNew(path); \
 	variable = class_name::Deserialize(_file_data_serialized); \
 	delete[] _file_data_serialized;}
 #endif
+
+#ifndef FILE_READ_SERIALIZED_NEW
+#define FILE_READ_SERIALIZED_NEW(path, variable, class_name) {char *_file_data_serialized = File::ReadNew(path); \
+	variable = class_name::DeserializeNew(_file_data_serialized); \
+	delete[] _file_data_serialized;}
+#endif
+
 
 class File
 {
