@@ -11,10 +11,10 @@ varying vec3 normal_var;
 
 void main()
 {
-	mat4 bone_mat = bones[/*int(bone_ids[0])*/0] * bone_weights[0];
- 	bone_mat += bones[/*int(bone_ids[1])*/0] * bone_weights[1];
- 	bone_mat += bones[/*int(bone_ids[2])*/0] * bone_weights[2];
- 	bone_mat += bones[/*int(bone_ids[3])*/0] * bone_weights[3];
+	mat4 bone_mat = bones[int(bone_ids[0])] * bone_weights[0];
+ 	bone_mat += bones[int(bone_ids[1])] * bone_weights[1];
+ 	bone_mat += bones[int(bone_ids[2])] * bone_weights[2];
+ 	bone_mat += bones[int(bone_ids[3])] * bone_weights[3];
 
 	gl_Position = (model_view_projection_matrix * bone_mat) * vec4(position, 1.0);
 

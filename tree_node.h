@@ -64,7 +64,7 @@ public:
 	{
 		auto node = new TreeNode<C>(cast_function(this->value));
 		for (auto iter = children.begin(); iter != children.end(); iter++)
-			(*iter)->CloneTreeNew<C>(cast_function, node);
+			(*iter)->template CloneTreeNew<C>(cast_function, node);
 		if (root)
 			root->AddChildNode(node);
 		else
@@ -100,8 +100,7 @@ public:
 
 	vector<unsigned int> GetStructure()
 	{
-		vector<unsigned int> result;
-		unsigned int node_id = 0;
+		vector<unsigned int> result; 
 		auto fringe = GetBreadthFirstSearchFringe();
 		for (unsigned int i = 0; i < fringe.size(); ++i)
 		{

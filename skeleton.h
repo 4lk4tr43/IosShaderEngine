@@ -71,8 +71,10 @@ public:
 	{
 		MemoryBuilder memory_builder;
 		memory_builder.PushVector(_bone_offsets);
-		memory_builder.PushVector(_bones[0]->GetStructure());
-		memory_builder.PushVector(_bones[0]->GetBreadthFirstSearchValues());
+        auto structure = _bones[0]->GetStructure();
+		memory_builder.PushVector(structure);
+        auto values = _bones[0]->GetBreadthFirstSearchValues();
+		memory_builder.PushVector(values);
 		vector<unsigned int> bone_indices;
 		for (auto iter = _bones.begin(); iter != _bones.end(); iter++)
 			bone_indices.push_back((*iter)->GetIndex());

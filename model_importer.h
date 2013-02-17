@@ -96,7 +96,7 @@ class ModelImporter
 			}
 
 			current_top = current_max;
-			unsigned int counter = same_max;
+			int counter = same_max;
 			for (unsigned int j = 0; j < vertex_weights.size(); ++j)
 			{
 				if (current_max == vertex_weights[j])
