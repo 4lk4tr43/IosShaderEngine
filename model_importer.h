@@ -233,7 +233,7 @@ public:
 
 		if (use_skeleton > 0 && mesh->HasBones())
 		{
-			auto bone_indices = new vector<GLuint>[mesh->mNumVertices];
+			auto bone_indices = new vector<GLfloat>[mesh->mNumVertices];
 			auto bone_weights = new vector<GLfloat>[mesh->mNumVertices];
 
 			for (unsigned int i = 0; i < mesh->mNumBones; ++i)
@@ -242,12 +242,12 @@ public:
 				for (unsigned int j = 0; j < bone->mNumWeights; ++j)
 				{
 					auto weight = bone->mWeights[j];
-					bone_indices[weight.mVertexId].push_back(i);
+					bone_indices[weight.mVertexId].push_back(GLfloat(i));
 					bone_weights[weight.mVertexId].push_back(weight.mWeight);
 				}
 			}
 
-			VertexAttribute attribute_id(use_skeleton, GL_UNSIGNED_INT, GL_FALSE);
+			VertexAttribute attribute_id(use_skeleton, GL_FLOAT, GL_FALSE);
 			mesh_converted.vertex_description += attribute_id;
 			VertexAttribute attribute_weight(use_skeleton, GL_FLOAT, GL_FALSE);			
 			mesh_converted.vertex_description += attribute_weight;
@@ -275,7 +275,7 @@ public:
 				break;
 			}
 			
-			auto index_attributes = new GLuint[mesh->mNumVertices * use_skeleton];
+			auto index_attributes = new GLfloat[mesh->mNumVertices * use_skeleton];
 			auto weight_attributes = new GLfloat[mesh->mNumVertices * use_skeleton];
 			memset(index_attributes, 0, mesh->mNumVertices * attribute_id.Size());
 			memset(weight_attributes, 0, mesh->mNumVertices * attribute_weight.Size());
@@ -291,11 +291,6 @@ public:
 				}
 			}
 			NormalizeBoneWeights(weight_attributes, use_skeleton, mesh->mNumVertices);
-
-			for (unsigned int i = 0; i < mesh->mNumVertices; i+=4)
-			{
-				cout << index_attributes[i+0] << " " << index_attributes[i+1] << " " << index_attributes[i+2] << " " << index_attributes[i+3] << " "<< endl;
-			}
 
 			mesh_converted.vertex_data.push_back(MemoryBuilder::CopyMemoryToVector<char>((char*)index_attributes, attribute_id.Size() * mesh_converted.vertex_count));
 			delete[] index_attributes;
