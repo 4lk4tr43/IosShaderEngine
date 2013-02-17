@@ -101,6 +101,7 @@ public:
 			_vbos.push_back(vbo);
 			VertexAttribute attribute = vertex_description[i];
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
+			auto x = data_buffers[i];
 			glBufferData(GL_ARRAY_BUFFER, attribute.Size() * vertex_count, data_buffers[i], vertex_usage);
 			if (OpenGL::IsIntegerType(attribute.component_type))			
 				glVertexAttribIPointer(i, attribute.component_count, attribute.component_type, 0, 0);
